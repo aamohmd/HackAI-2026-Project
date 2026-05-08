@@ -1,4 +1,4 @@
-COMPOSE=docker-compose
+COMPOSE=docker compose
 
 help:
 	@echo "Usage:"
@@ -25,7 +25,7 @@ dev-frontend:
 	cd frontend && npm run dev
 
 dev-backend:
-	uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
+	python3 -m uvicorn api.main:app --reload --host 0.0.0.0 --port 8000
 
 up-db:
 	$(COMPOSE) up -d db
