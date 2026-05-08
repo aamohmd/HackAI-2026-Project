@@ -10,7 +10,7 @@ function Dashboard() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
       <h1 className="text-3xl font-bold">Welcome, {user?.email}!</h1>
-      <p className="text-gray-500">You are logged in to the HackAI 2026 Boilerplate.</p>
+      <p className="text-muted-foreground">You are logged in to the HackAI 2026 Boilerplate.</p>
       <Button onClick={logout} variant="outline">Logout</Button>
     </div>
   );

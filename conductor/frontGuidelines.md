@@ -57,12 +57,15 @@ Consistency in spacing is key to a "premium" feel. We follow a strict spacing sc
     *   Standard height: `h-10` or `h-11`.
     *   Use `gap-2` for icons inside buttons.
 
-## 6. Coding Patterns
+## 7. Borders and Hover Effects
 
-*   **Path Aliases:** Always use `@/` for imports (e.g., `@/components/ui/button`).
-*   **Responsive Design:** Design mobile-first. Use `sm:`, `md:`, `lg:` prefixes for larger screens.
-*   **Accessibility:** Ensure all interactive elements have proper `aria-labels` and keyboard focus states (shadcn handles most of this).
+*   **Borders:** Use `border-border` for standard borders. Prefer thin, subtle borders (`border`).
+*   **Hover Effects:**
+    *   **Buttons:** Standard shadcn/ui hover states are preferred.
+    *   **Cards:** For interactive cards, use `transition-all duration-200 hover:border-primary/50 hover:shadow-md`.
+    *   **Interactive Elements:** Use `hover:text-primary` for links and subtle highlights.
+    *   **Inputs:** Focus states should use `ring-primary`.
 
-## 6. Development Mode
+## 8. Development Mode
 
 Run `make dev` to see your changes with Hot Module Replacement (HMR).

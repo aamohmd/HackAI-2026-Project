@@ -101,7 +101,7 @@ export default function LoginPage() {
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               New to the platform?{' '}
-              <Link to="/register" className="text-primary font-medium hover:underline transition-all">
+              <Link to="/register" className="text-primary font-medium hover:text-primary/80 hover:underline transition-all">
                 Create an account
               </Link>
             </div>

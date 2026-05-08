@@ -120,7 +120,7 @@ export default function RegisterPage() {
             </Button>
             <div className="text-sm text-center text-muted-foreground">
               Already have an account?{' '}
-              <Link to="/login" className="text-primary font-medium hover:underline transition-all">
+              <Link to="/login" className="text-primary font-medium hover:text-primary/80 hover:underline transition-all">
                 Sign In
               </Link>
             </div>
