@@ -3,6 +3,7 @@ COMPOSE=docker-compose
 help:
 	@echo "Usage:"
 	@echo "  make install         - Install both Backend & Frontend dependencies natively"
+	@echo "  make dev             - Run EVERYTHING (DB in Docker, Apps natively) in one terminal"
 	@echo "  make dev-frontend    - Run Vite frontend natively (Host machine)"
 	@echo "  make dev-backend     - Run FastAPI backend natively (Host machine)"
 	@echo "  make up-db           - Start only the PostgreSQL database in Docker"
@@ -14,6 +15,11 @@ help:
 install:
 	pip install -r requirements.txt
 	cd frontend && npm install
+
+dev: up-db
+	@echo "Starting Backend and Frontend in parallel..."
+	@echo "Press Ctrl+C to stop both."
+	@ (trap 'kill 0' SIGINT; make dev-backend & make dev-frontend & wait)
 
 dev-frontend:
 	cd frontend && npm run dev
