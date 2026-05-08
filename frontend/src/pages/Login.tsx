@@ -86,6 +86,7 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
+                placeholder="••••••••"
                 {...register('password')}
                 className={errors.password ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}
               />

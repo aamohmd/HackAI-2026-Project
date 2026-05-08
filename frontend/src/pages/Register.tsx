@@ -90,6 +90,7 @@ export default function RegisterPage() {
               <Input
                 id="password"
                 type="password"
+                placeholder="••••••••"
                 {...register('password')}
                 className={errors.password ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}
               />
@@ -104,6 +105,7 @@ export default function RegisterPage() {
               <Input
                 id="confirmPassword"
                 type="password"
+                placeholder="••••••••"
                 {...register('confirmPassword')}
                 className={errors.confirmPassword ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}
               />
