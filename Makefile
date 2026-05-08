@@ -10,6 +10,7 @@ help:
 	@echo "  make build           - Build all Docker images"
 	@echo "  make up              - Start all services (API, DB, Frontend) in Docker"
 	@echo "  make down            - Stop and remove all Docker containers"
+	@echo "  make clean           - Full cleanup: Stop containers, remove volumes, images, and local artifacts"
 	@echo "  make logs            - Follow the logs of the containers"
 
 install:
@@ -39,7 +40,16 @@ up:
 down:
 	$(COMPOSE) down
 
+clean:
+	@echo "Cleaning up Docker resources..."
+	$(COMPOSE) down -v --rmi all
+	@echo "Cleaning up local artifacts..."
+	rm -rf frontend/node_modules
+	rm -rf frontend/dist
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	@echo "Cleanup complete. Run 'make install' to start fresh."
+
 logs:
 	$(COMPOSE) logs -f
 
-.PHONY: install dev-frontend dev-backend up-db build up down logs help
+.PHONY: install dev-frontend dev-backend up-db build up down clean logs help
