@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from ..database import get_db
 from ..models import User
 from ..schemas import UserCreate, UserRead, Token
+from ..limiter import limiter
 
 load_dotenv()
 
@@ -43,7 +44,8 @@ def create_token(data: dict, expires_delta: timedelta | None = None):
 
 # Endpoints
 @router.post("/register", response_model=UserRead)
-def register(user: UserCreate, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):
     db_user = db.query(User).filter(User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -56,7 +58,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 @router.post("/login", response_model=Token)
-def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def login(request: Request, response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
@@ -91,6 +94,7 @@ def login(response: Response, form_data: OAuth2PasswordRequestForm = Depends(), 
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/refresh", response_model=Token)
+@limiter.limit("20/minute")
 def refresh_token(request: Request, response: Response, db: Session = Depends(get_db)):
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
