@@ -1,0 +1,31 @@
+name: Hackathon CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  integration-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker Images
+        run: docker-compose build
+
+      - name: Start Services
+        run: docker-compose up -d
+
+      - name: Wait for API and Database Initialization
+        run: sleep 10
+
+      - name: Ping Health Endpoint
+        run: curl -f http://localhost:8000/health-db
+        
+      - name: View Logs on Failure
+        if: failure()
+        run: docker-compose logs
