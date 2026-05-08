@@ -46,7 +46,7 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background px-4 font-sans">
       <Card className="w-full max-w-md shadow-lg border-border/50">
-        <CardHeader className="space-y-1">
+        <CardHeader className="space-y-2 p-6">
           <div className="flex justify-center mb-2">
             <div className="p-3 bg-primary/10 rounded-full text-primary">
               <SignIn size={32} weight="bold" />
@@ -58,14 +58,14 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6 p-6 pt-0">
             {error && (
-              <div className="p-3 text-sm text-white bg-destructive rounded-md animate-in fade-in slide-in-from-top-1">
+              <div className="p-4 text-sm text-white bg-destructive rounded-md animate-in fade-in slide-in-from-top-1">
                 {error}
               </div>
             )}
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
+              <label htmlFor="email" className="text-sm font-medium flex items-center gap-2 px-0.5">
                 <EnvelopeSimple size={18} /> Email
               </label>
               <Input
@@ -76,11 +76,11 @@ export default function LoginPage() {
                 className={errors.email ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}
               />
               {errors.email && (
-                <p className="text-xs text-destructive mt-1">{errors.email.message}</p>
+                <p className="text-xs text-destructive mt-1.5 px-0.5">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium flex items-center gap-2">
+              <label htmlFor="password" className="text-sm font-medium flex items-center gap-2 px-0.5">
                 <LockSimple size={18} /> Password
               </label>
               <Input
@@ -91,11 +91,11 @@ export default function LoginPage() {
                 className={errors.password ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}
               />
               {errors.password && (
-                <p className="text-xs text-destructive mt-1">{errors.password.message}</p>
+                <p className="text-xs text-destructive mt-1.5 px-0.5">{errors.password.message}</p>
               )}
             </div>
           </CardContent>
-          <CardFooter className="flex flex-col space-y-4 pt-2">
+          <CardFooter className="flex flex-col space-y-4 p-6 pt-0">
             <Button type="submit" className="w-full text-base font-semibold py-6" disabled={isLoading}>
               {isLoading ? 'Processing...' : 'Sign In'}
             </Button>

@@ -39,7 +39,25 @@ Always use existing components from `@/components/ui/` before building your own.
 *   **Radius:** We use a **Medium (0.5rem)** border radius. It's already configured in `tailwind.config.js`.
 *   **Shadows:** Use `shadow-sm` or `shadow-md`. Avoid heavy, dark shadows.
 
-## 5. Coding Patterns
+## 5. Padding and Spacing
+
+Consistency in spacing is key to a "premium" feel. We follow a strict spacing scale based on Tailwind's 4px unit.
+
+*   **Cards & Containers:** 
+    *   Use `p-6` (24px) for standard cards.
+    *   Use `p-8` (32px) for prominent feature cards or large desktop views.
+*   **Forms:**
+    *   Vertical spacing between fields: `space-y-4` (16px).
+    *   Spacing between a Label and its Input: `gap-2` (8px).
+    *   Form footers: `pt-4` (16px) or `pt-6` (24px).
+*   **Page Layout:**
+    *   Horizontal page padding: `px-4` (mobile), `px-6` (tablet), `px-8` (desktop).
+    *   Vertical section spacing: `py-12` (small sections), `py-20` (large hero sections).
+*   **Buttons:**
+    *   Standard height: `h-10` or `h-11`.
+    *   Use `gap-2` for icons inside buttons.
+
+## 6. Coding Patterns
 
 *   **Path Aliases:** Always use `@/` for imports (e.g., `@/components/ui/button`).
 *   **Responsive Design:** Design mobile-first. Use `sm:`, `md:`, `lg:` prefixes for larger screens.
