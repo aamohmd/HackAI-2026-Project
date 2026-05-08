@@ -39,6 +39,7 @@
     --input: 214 32% 91%;
     --ring: 199 89% 48%;
 
+    /* Radius Medium = 0.5rem (8px) */
     --radius: 0.5rem;
   }
 
@@ -80,5 +81,20 @@
   body {
     @apply bg-background text-foreground;
     font-family: "Figtree", sans-serif;
+  }
+}
+
+/* Force Luma style components to follow our global radius */
+@layer utilities {
+  .rounded-4xl, .rounded-3xl, .rounded-2xl {
+    border-radius: var(--radius) !important;
+  }
+  .rounded-t-4xl {
+    border-top-left-radius: var(--radius) !important;
+    border-top-right-radius: var(--radius) !important;
+  }
+  .rounded-b-4xl {
+    border-bottom-left-radius: var(--radius) !important;
+    border-bottom-right-radius: var(--radius) !important;
   }
 }
