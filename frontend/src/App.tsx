@@ -2,16 +2,41 @@ import { Routes, Route } from 'react-router-dom';
 import LoginPage from '@/pages/Login';
 import RegisterPage from '@/pages/Register';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
 
-function Dashboard() {
-  const { user, logout } = useAuth();
+function DashboardHome() {
+  const { user } = useAuth();
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen space-y-4">
-      <h1 className="text-3xl font-bold">Welcome, {user?.email}!</h1>
-      <p className="text-muted-foreground">You are logged in to the HackAI 2026 Boilerplate.</p>
-      <Button onClick={logout} variant="outline">Logout</Button>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Welcome back, {user?.full_name || user?.email.split('@')[0]}.
+        </p>
+      </div>
+      
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {/* Placeholder cards */}
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="p-6 bg-white rounded-lg border border-border shadow-sm">
+            <h3 className="font-semibold text-sm text-muted-foreground">Metric {i}</h3>
+            <p className="text-2xl font-bold mt-2">--</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ProfilePlaceholder() {
+  return (
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
+      <p className="text-muted-foreground">Manage your account settings and profile information.</p>
+      <div className="p-8 bg-white rounded-lg border border-border border-dashed flex items-center justify-center text-muted-foreground">
+        Profile content coming soon...
+      </div>
     </div>
   );
 }
@@ -23,10 +48,14 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<Dashboard />} />
+        <Route element={<DashboardLayout />}>
+          <Route path="/" element={<DashboardHome />} />
+          <Route path="/profile" element={<ProfilePlaceholder />} />
+        </Route>
       </Route>
     </Routes>
   );
 }
 
 export default App;
+

@@ -4,6 +4,9 @@ export interface User {
   id: number;
   email: string;
   is_active: boolean;
+  full_name?: string;
+  bio?: string;
+  avatar_url?: string;
 }
 
 export interface Token {
@@ -41,7 +44,8 @@ export const authApi = {
   },
 
   getMe: async (): Promise<User> => {
-    const { data } = await api.get<User>('/auth/me');
+    const { data } = await api.get<User>('/users/me');
     return data;
   },
 };
+
