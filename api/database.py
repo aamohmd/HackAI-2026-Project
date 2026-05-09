@@ -27,25 +27,16 @@ DB_PORT = get_env_with_warning("DB_PORT", "5432")
 
 URL_DATABASE = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
-# Retry logic for database connection
-def get_engine():
-    retries = 5
-    while retries > 0:
-        try:
-            engine = create_engine(URL_DATABASE)
-            # Try to connect to verify
-            with engine.connect() as conn:
-                logger.info("Successfully connected to the database!")
-            return engine
-        except exc.OperationalError as e:
-            retries -= 1
-            logger.warning(f"Database connection failed. Retrying... ({retries} attempts left)")
-            time.sleep(2)
-    
-    logger.error("Could not connect to the database after multiple attempts.")
-    return create_engine(URL_DATABASE) # One last try to let it fail normally
+# Retry logic for database connection (optional utility)
+def verify_connection(engine):
+    try:
+        with engine.connect() as conn:
+            logger.info("Successfully connected to the database!")
+        return True
+    except exc.OperationalError:
+        return False
 
-engine = get_engine()
+engine = create_engine(URL_DATABASE)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

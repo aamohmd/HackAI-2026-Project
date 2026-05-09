@@ -8,12 +8,14 @@ from . import models
 from .limiter import limiter
 
 # Create database tables
-try:
-    Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"Database connection failed, skipping table creation: {e}")
+# Base.metadata.create_all(bind=engine) # Moved to startup event
 
 app = FastAPI(title="HackAI 2026 API")
+
+@app.on_event("startup")
+def startup_event():
+    Base.metadata.create_all(bind=engine)
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
@@ -34,4 +36,4 @@ async def health_check():
     return {"status": "ok"}
 
 app.include_router(auth.router)
-app.include_router(users.router, prefix="/api/users", tags=["users"])
+app.include_router(users.router, prefix="/users", tags=["users"])

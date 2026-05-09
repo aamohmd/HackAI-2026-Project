@@ -57,7 +57,7 @@ def test_update_user_profile(client, test_user):
     user, token = test_user
     
     response = client.patch(
-        "/api/users/me",
+        "/users/me",
         json={"full_name": "Updated Name", "bio": "New Bio"},
         headers={"Authorization": f"Bearer {token}"}
     )
@@ -72,7 +72,7 @@ def test_get_user_profile(client, test_user):
     user, token = test_user
     
     response = client.get(
-        "/api/users/me",
+        "/users/me",
         headers={"Authorization": f"Bearer {token}"}
     )
     
@@ -83,7 +83,7 @@ def test_get_user_profile(client, test_user):
 
 def test_update_user_profile_unauthorized(client):
     response = client.patch(
-        "/api/users/me",
+        "/users/me",
         json={"full_name": "Updated Name"}
     )
     assert response.status_code == 401

@@ -40,7 +40,7 @@
     --ring: 199 89% 48%;
 
     /* Radius Medium = 0.5rem (8px) */
-    --radius: 2rem;
+    --radius: 0.5rem;
   }
 
   .dark {

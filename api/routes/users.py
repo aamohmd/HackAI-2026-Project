@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import User
 from ..schemas import UserRead, UserUpdate
-from .auth import get_current_user
+from ..dependencies import get_current_user
 
 router = APIRouter()
 
@@ -22,7 +22,6 @@ def update_profile(
     for key, value in update_data.items():
         setattr(current_user, key, value)
     
-    db.add(current_user)
     db.commit()
     db.refresh(current_user)
     return current_user
