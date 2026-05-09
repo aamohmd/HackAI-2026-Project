@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
@@ -7,14 +8,13 @@ from .routes import auth, users
 from . import models
 from .limiter import limiter
 
-# Create database tables
-# Base.metadata.create_all(bind=engine) # Moved to startup event
-
-app = FastAPI(title="HackAI 2026 API")
-
-@app.on_event("startup")
-def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Create database tables
     Base.metadata.create_all(bind=engine)
+    yield
+
+app = FastAPI(title="HackAI 2026 API", lifespan=lifespan)
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
