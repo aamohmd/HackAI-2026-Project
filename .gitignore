@@ -1,2 +1,7 @@
 .env
 __pycache__
+docs/
+.superpowers/
+test.db
+test_avatar.db
+*.tsbuildinfo

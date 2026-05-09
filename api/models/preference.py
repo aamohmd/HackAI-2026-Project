@@ -4,22 +4,29 @@ from sqlalchemy.orm import relationship
 from ..database import Base
 from .user import User
 
+DEFAULT_PREFERENCES = {
+    "theme": "system",
+    "language": "en",
+    "timezone": "UTC",
+    "marketing_emails": False,
+    "security_emails": True,
+    "update_emails": True
+}
+
 class UserPreference(Base):
     __tablename__ = "user_preferences"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()), index=True)
     user_id = Column(String, ForeignKey("users.id"), unique=True, index=True, nullable=False)
-    theme = Column(String, default="system", nullable=False)
-    language = Column(String, default="en", nullable=False)
-    timezone = Column(String, default="UTC", nullable=False)
-    marketing_emails = Column(Boolean, default=False, nullable=False)
-    security_emails = Column(Boolean, default=True, nullable=False)
-    update_emails = Column(Boolean, default=True, nullable=False)
+    
+    theme = Column(String, default=DEFAULT_PREFERENCES["theme"], nullable=False)
+    language = Column(String, default=DEFAULT_PREFERENCES["language"], nullable=False)
+    timezone = Column(String, default=DEFAULT_PREFERENCES["timezone"], nullable=False)
+    marketing_emails = Column(Boolean, default=DEFAULT_PREFERENCES["marketing_emails"], nullable=False)
+    security_emails = Column(Boolean, default=DEFAULT_PREFERENCES["security_emails"], nullable=False)
+    update_emails = Column(Boolean, default=DEFAULT_PREFERENCES["update_emails"], nullable=False)
 
     user = relationship("User", back_populates="preferences")
-
-# Ensure User model has the back_populates relationship
-User.preferences = relationship("UserPreference", back_populates="user", uselist=False, cascade="all, delete-orphan")
 
 @event.listens_for(User, "after_insert")
 def create_user_preferences(mapper, connection, target):
@@ -27,11 +34,6 @@ def create_user_preferences(mapper, connection, target):
         UserPreference.__table__.insert().values(
             id=str(uuid.uuid4()),
             user_id=target.id,
-            theme="system",
-            language="en",
-            timezone="UTC",
-            marketing_emails=False,
-            security_emails=True,
-            update_emails=True
+            **DEFAULT_PREFERENCES
         )
     )

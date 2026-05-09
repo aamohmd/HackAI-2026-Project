@@ -1,5 +1,6 @@
 import uuid
 from sqlalchemy import Column, String, Boolean
+from sqlalchemy.orm import relationship
 from ..database import Base
 
 class User(Base):
@@ -12,3 +13,5 @@ class User(Base):
     full_name = Column(String, nullable=True)
     bio = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
+
+    preferences = relationship("UserPreference", back_populates="user", uselist=False, cascade="all, delete-orphan")
