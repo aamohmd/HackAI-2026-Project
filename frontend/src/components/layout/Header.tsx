@@ -1,17 +1,18 @@
 import { useAuth } from '@/hooks/useAuth';
 import { User } from "@phosphor-icons/react";
+import { getUserDisplayName } from '@/lib/utils';
 
 export function Header() {
   const { user } = useAuth();
 
   return (
-    <header className="h-16 border-b border-border bg-white flex items-center justify-end px-8 sticky top-0 z-10">
+    <header className="h-16 border-b border-border bg-card flex items-center justify-end px-8 sticky top-0 z-10">
       <div className="flex items-center gap-3">
         <div className="text-right">
           <p className="text-sm font-semibold text-foreground">
-            {user?.full_name || user?.email.split('@')[0]}
+            {getUserDisplayName(user)}
           </p>
-          <p className="text-xs text-muted-foreground capitalize">
+          <p className="text-xs text-muted-foreground">
             {user?.email}
           </p>
         </div>
