@@ -123,3 +123,36 @@ def test_upload_avatar_unauthorized(client):
     )
     
     assert response.status_code == 401
+
+def test_upload_avatar_deletes_old_file(client, test_user):
+    user, token = test_user
+    
+    # 1. Upload first avatar
+    file1_content = b"first image content"
+    file1 = io.BytesIO(file1_content)
+    response1 = client.post(
+        "/users/me/avatar",
+        headers={"Authorization": f"Bearer {token}"},
+        files={"file": ("test1.png", file1, "image/png")}
+    )
+    assert response1.status_code == 200
+    avatar1_url = response1.json()["avatar_url"]
+    avatar1_path = f".{avatar1_url}"
+    assert os.path.exists(avatar1_path)
+    
+    # 2. Upload second avatar
+    file2_content = b"second image content"
+    file2 = io.BytesIO(file2_content)
+    response2 = client.post(
+        "/users/me/avatar",
+        headers={"Authorization": f"Bearer {token}"},
+        files={"file": ("test2.png", file2, "image/png")}
+    )
+    assert response2.status_code == 200
+    avatar2_url = response2.json()["avatar_url"]
+    avatar2_path = f".{avatar2_url}"
+    assert os.path.exists(avatar2_path)
+    
+    # 3. Verify first avatar is deleted
+    assert not os.path.exists(avatar1_path)
+    assert avatar1_url != avatar2_url

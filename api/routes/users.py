@@ -7,10 +7,10 @@ from ..database import get_db
 from ..models import User
 from ..schemas import UserRead, UserUpdate
 from ..dependencies import get_current_user
+from ..utils import ensure_upload_dir, UPLOAD_DIR
 
 router = APIRouter()
 
-UPLOAD_DIR = "uploads"
 ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png", "svg"}
 MAX_FILE_SIZE = 2 * 1024 * 1024  # 2MB
 
@@ -47,26 +47,32 @@ async def upload_avatar(
             detail="Unsupported file type. Allowed types: JPG, PNG, SVG."
         )
 
-    # Validate file size
-    # We need to read the file content to get the size
-    content = await file.read()
-    if len(content) > MAX_FILE_SIZE:
+    # Validate file size efficiently using the size attribute
+    if file.size > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
             detail="File too large. Maximum size is 2MB."
         )
 
+    # Delete old avatar if it exists to prevent orphaned files
+    if current_user.avatar_url and current_user.avatar_url.startswith("/uploads/"):
+        old_avatar_path = current_user.avatar_url.lstrip("/")
+        if os.path.exists(old_avatar_path):
+            try:
+                os.remove(old_avatar_path)
+            except OSError:
+                pass  # Ignore errors if file cannot be deleted
+
     # Ensure upload directory exists
-    if not os.path.exists(UPLOAD_DIR):
-        os.makedirs(UPLOAD_DIR)
+    ensure_upload_dir()
 
     # Generate unique filename
     filename = f"{uuid.uuid4()}.{extension}"
     file_path = os.path.join(UPLOAD_DIR, filename)
 
-    # Save file
-    with open(file_path, "wb") as f:
-        f.write(content)
+    # Save file efficiently
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
 
     # Update user avatar_url
     avatar_url = f"/uploads/{filename}"

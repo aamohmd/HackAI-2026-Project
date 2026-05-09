@@ -9,14 +9,14 @@ from .database import engine, Base
 from .routes import auth, users
 from . import models
 from .limiter import limiter
+from .utils import ensure_upload_dir, UPLOAD_DIR
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Create database tables
     Base.metadata.create_all(bind=engine)
     # Ensure upload directory exists
-    if not os.path.exists("uploads"):
-        os.makedirs("uploads")
+    ensure_upload_dir()
     yield
 
 app = FastAPI(title="HackAI 2026 API", lifespan=lifespan)
@@ -37,9 +37,8 @@ app.add_middleware(
 )
 
 # Serve static files
-if not os.path.exists("uploads"):
-    os.makedirs("uploads")
-app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+ensure_upload_dir()
+app.mount(f"/{UPLOAD_DIR}", StaticFiles(directory=UPLOAD_DIR), name=UPLOAD_DIR)
 
 @app.get("/health")
 async def health_check():
