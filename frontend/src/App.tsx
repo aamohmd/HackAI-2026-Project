@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import LoginPage from '@/pages/Login';
 import RegisterPage from '@/pages/Register';
+import ProfilePage from '@/pages/Profile';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,17 +31,7 @@ function DashboardHome() {
   );
 }
 
-function ProfilePlaceholder() {
-  return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
-      <p className="text-muted-foreground">Manage your account settings and profile information.</p>
-      <div className="p-8 bg-card rounded-lg border border-border border-dashed flex items-center justify-center text-muted-foreground">
-        Profile content coming soon...
-      </div>
-    </div>
-  );
-}
+
 
 function App() {
   return (
@@ -51,7 +42,7 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<DashboardLayout />}>
           <Route path="/" element={<DashboardHome />} />
-          <Route path="/profile" element={<ProfilePlaceholder />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Route>
     </Routes>
