@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { CircleNotch } from '@phosphor-icons/react';
+import { AvatarUpload } from './AvatarUpload';
 
 const profileSchema = z.object({
   full_name: z.string().min(2, 'Name must be at least 2 characters').max(100).optional().or(z.literal('')),
@@ -63,6 +64,10 @@ export const ProfileForm: React.FC = () => {
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-6 px-0">
+          <div className="flex justify-center py-4">
+            <AvatarUpload currentAvatarUrl={profile?.avatar_url} />
+          </div>
+
           <div className="space-y-2">
             <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
               Email Address
