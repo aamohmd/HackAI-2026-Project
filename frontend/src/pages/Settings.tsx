@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SettingsTabs } from '@/components/settings/SettingsTabs';
+import { AppearanceSection } from '@/components/settings/AppearanceSection';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 export default function SettingsPage() {
@@ -36,19 +37,7 @@ export default function SettingsPage() {
           </Card>
         );
       case 'appearance':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Appearance</CardTitle>
-              <CardDescription>Customize the look and feel of the application.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="py-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-                Theme toggle coming in Task 5...
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <AppearanceSection />;
       case 'danger':
         return (
           <Card className="border-destructive/50">
