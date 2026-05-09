@@ -18,10 +18,13 @@ export default defineConfig(({ mode }) => {
     server: {
       host: true,
       port: 5173,
+      strictPort: true,
+      hmr: {
+        clientPort: 5173,
+      },
       proxy: {
         '/api': {
-          // Use 'http://api:8000' inside Docker, 'http://localhost:8000' for native dev
-          target: mode === 'production' ? 'http://api:8000' : 'http://localhost:8000',
+          target: process.env.VITE_API_TARGET || 'http://api:8000',
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api/, ''),
         },

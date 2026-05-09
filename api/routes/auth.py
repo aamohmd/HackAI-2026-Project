@@ -42,6 +42,17 @@ def create_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+def set_refresh_cookie(response: Response, refresh_token: str):
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        expires=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        samesite="lax",
+        secure=False, # Set to True in production (HTTPS)
+    )
+
 # Endpoints
 @router.post("/register", response_model=UserRead)
 @limiter.limit("5/minute")
@@ -68,60 +79,59 @@ def login(request: Request, response: Response, form_data: OAuth2PasswordRequest
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Access Token
+    # Access Token (Using User ID for privacy)
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_token(
-        data={"sub": user.email, "type": "access"}, expires_delta=access_token_expires
+        data={"sub": str(user.id), "type": "access"}, expires_delta=access_token_expires
     )
     
-    # Refresh Token
+    # Refresh Token (Using User ID for privacy)
     refresh_token_expires = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
     refresh_token = create_token(
-        data={"sub": user.email, "type": "refresh"}, expires_delta=refresh_token_expires
+        data={"sub": str(user.id), "type": "refresh"}, expires_delta=refresh_token_expires
     )
     
-    # Set refresh token in HttpOnly cookie
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
-        expires=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
-        samesite="lax",
-        secure=False, # Set to True in production (HTTPS)
-    )
+    set_refresh_cookie(response, refresh_token)
     
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/refresh", response_model=Token)
 @limiter.limit("20/minute")
 def refresh_token(request: Request, response: Response, db: Session = Depends(get_db)):
-    refresh_token = request.cookies.get("refresh_token")
-    if not refresh_token:
+    old_refresh_token = request.cookies.get("refresh_token")
+    if not old_refresh_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Refresh token missing")
     
     try:
-        payload = jwt.decode(refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
+        payload = jwt.decode(old_refresh_token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("sub")
         token_type: str = payload.get("type")
         
-        if email is None or token_type != "refresh":
+        if user_id is None or token_type != "refresh":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
             
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
         
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
     
-    # Generate new access token
+    # REFRESH TOKEN ROTATION: Generate BOTH new tokens
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_token(
-        data={"sub": user.email, "type": "access"}, expires_delta=access_token_expires
+    new_access_token = create_token(
+        data={"sub": str(user.id), "type": "access"}, expires_delta=access_token_expires
     )
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    refresh_token_expires = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    new_refresh_token = create_token(
+        data={"sub": str(user.id), "type": "refresh"}, expires_delta=refresh_token_expires
+    )
+    
+    # Replace the old cookie with the new one
+    set_refresh_cookie(response, new_refresh_token)
+    
+    return {"access_token": new_access_token, "token_type": "bearer"}
 
 @router.post("/logout")
 def logout(response: Response):
@@ -137,15 +147,15 @@ def get_me(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
+        user_id: str = payload.get("sub")
         token_type: str = payload.get("type")
         
-        if email is None or token_type != "access":
+        if user_id is None or token_type != "access":
             raise credentials_exception
     except JWTError:
         raise credentials_exception
         
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise credentials_exception
     return user

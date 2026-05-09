@@ -8,7 +8,7 @@ class UserCreate(UserBase):
     password: str
 
 class UserRead(UserBase):
-    id: int
+    id: str
     is_active: bool
 
     class Config:
