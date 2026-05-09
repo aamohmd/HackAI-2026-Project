@@ -7,6 +7,9 @@ import shutil
 
 from api.main import app
 from api.database import Base, get_db
+from api.models import User
+from api.routes.auth import create_token, get_password_hash
+from datetime import timedelta
 
 # Test database setup
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
@@ -49,3 +52,24 @@ def db():
 @pytest.fixture
 def client():
     return TestClient(app)
+
+@pytest.fixture
+def test_user(db):
+    user = User(
+        email="test@example.com",
+        hashed_password=get_password_hash("testpassword"),
+        full_name="Test User",
+        is_active=True
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+@pytest.fixture
+def auth_headers(test_user):
+    access_token = create_token(
+        data={"sub": str(test_user.id), "type": "access"},
+        expires_delta=timedelta(minutes=30)
+    )
+    return {"Authorization": f"Bearer {access_token}"}
