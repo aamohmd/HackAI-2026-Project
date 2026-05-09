@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { SettingsTabs } from '@/components/settings/SettingsTabs';
 import { AppearanceSection } from '@/components/settings/AppearanceSection';
+import { GeneralSection } from '@/components/settings/GeneralSection';
+import { NotificationSection } from '@/components/settings/NotificationSection';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 export default function SettingsPage() {
@@ -9,33 +11,9 @@ export default function SettingsPage() {
   const renderContent = () => {
     switch (activeTab) {
       case 'general':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>General Settings</CardTitle>
-              <CardDescription>Manage your basic account settings and locale.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="py-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-                General settings coming in Task 6...
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <GeneralSection />;
       case 'notifications':
-        return (
-          <Card>
-            <CardHeader>
-              <CardTitle>Notifications</CardTitle>
-              <CardDescription>Configure how you receive updates and alerts.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="py-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-                Notification toggles coming in Task 6...
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <NotificationSection />;
       case 'appearance':
         return <AppearanceSection />;
       case 'danger':
