@@ -1,11 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { House, User, SignOut, FlyingSaucer } from "@phosphor-icons/react";
+import { House, User, Gear, SignOut, FlyingSaucer } from "@phosphor-icons/react";
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { icon: House, label: 'Dashboard', href: '/' },
   { icon: User, label: 'Profile', href: '/profile' },
+  { icon: Gear, label: 'Settings', href: '/settings' },
 ];
 
 export function Sidebar() {

@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import LoginPage from '@/pages/Login';
 import RegisterPage from '@/pages/Register';
 import ProfilePage from '@/pages/Profile';
+import SettingsPage from '@/pages/Settings';
 import DashboardPage from '@/pages/Dashboard';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
@@ -16,6 +17,7 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/" element={<DashboardPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
       </Route>
     </Routes>
