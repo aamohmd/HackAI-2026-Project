@@ -2,7 +2,7 @@ import { ProfileForm } from '@/components/profile/ProfileForm';
 
 export default function ProfilePage() {
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-foreground">Profile Settings</h1>
         <p className="text-muted-foreground mt-1">
@@ -10,9 +10,7 @@ export default function ProfilePage() {
         </p>
       </div>
       
-      <div className="bg-card border border-border rounded-lg p-8 shadow-sm">
-        <ProfileForm />
-      </div>
+      <ProfileForm />
     </div>
   );
 }
