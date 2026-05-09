@@ -3,6 +3,7 @@ import { SettingsTabs } from '@/components/settings/SettingsTabs';
 import { AppearanceSection } from '@/components/settings/AppearanceSection';
 import { GeneralSection } from '@/components/settings/GeneralSection';
 import { NotificationSection } from '@/components/settings/NotificationSection';
+import { DangerZone } from '@/components/settings/DangerZone';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 
 export default function SettingsPage() {
@@ -17,19 +18,7 @@ export default function SettingsPage() {
       case 'appearance':
         return <AppearanceSection />;
       case 'danger':
-        return (
-          <Card className="border-destructive/50">
-            <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
-              <CardDescription>Irreversible actions for your account.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="py-8 text-center text-muted-foreground border-2 border-dashed border-destructive/20 rounded-lg">
-                Account deletion coming in Task 7...
-              </div>
-            </CardContent>
-          </Card>
-        );
+        return <DangerZone />;
       default:
         return null;
     }

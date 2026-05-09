@@ -38,6 +38,10 @@ export const usersApi = {
     return data;
   },
 
+  deleteAccount: async (deleteData: { password: string; confirmation_phrase: string }): Promise<void> => {
+    await api.delete('/users/me', { data: deleteData });
+  },
+
   uploadAvatar: async (file: File): Promise<User> => {
     const formData = new FormData();
     formData.append('file', file);
