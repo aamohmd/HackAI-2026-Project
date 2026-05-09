@@ -5,9 +5,10 @@ from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import User
-from ..schemas import UserRead, UserUpdate, UserPreferenceRead, UserPreferenceUpdate
+from ..schemas import UserRead, UserUpdate, UserPreferenceRead, UserPreferenceUpdate, UserDelete
 from ..dependencies import get_current_user
 from ..utils import ensure_upload_dir, UPLOAD_DIR
+from .auth import verify_password
 
 router = APIRouter()
 
@@ -103,3 +104,28 @@ async def upload_avatar(
     db.refresh(current_user)
 
     return current_user
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_account(
+    user_delete: UserDelete,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    # Verify password
+    if not verify_password(user_delete.password, current_user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect password"
+        )
+    
+    # Verify confirmation phrase
+    if user_delete.confirmation_phrase != "DELETE MY ACCOUNT":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid confirmation phrase"
+        )
+    
+    # Perform cascading delete
+    db.delete(current_user)
+    db.commit()
+    return None
