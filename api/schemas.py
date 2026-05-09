@@ -41,6 +41,10 @@ class UserPreferenceUpdate(BaseModel):
     security_emails: Optional[bool] = None
     update_emails: Optional[bool] = None
 
+class UserDelete(BaseModel):
+    password: str
+    confirmation_phrase: str
+
 class Token(BaseModel):
     access_token: str
     token_type: str
