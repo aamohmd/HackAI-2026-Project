@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import User
-from ..schemas import UserRead, UserUpdate
+from ..schemas import UserRead, UserUpdate, UserPreferenceRead, UserPreferenceUpdate
 from ..dependencies import get_current_user
 from ..utils import ensure_upload_dir, UPLOAD_DIR
 
@@ -17,6 +17,10 @@ MAX_FILE_SIZE = 2 * 1024 * 1024  # 2MB
 @router.get("/me", response_model=UserRead)
 def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+@router.get("/me/preferences", response_model=UserPreferenceRead)
+def get_preferences(current_user: User = Depends(get_current_user)):
+    return current_user.preferences
 
 @router.patch("/me", response_model=UserRead)
 def update_profile(
