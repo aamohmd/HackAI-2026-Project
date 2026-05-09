@@ -17,6 +17,11 @@ class UserRead(UserBase):
     class Config:
         from_attributes = True
 
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    bio: Optional[str] = None
+    avatar_url: Optional[str] = None
+
 class Token(BaseModel):
     access_token: str
     token_type: str

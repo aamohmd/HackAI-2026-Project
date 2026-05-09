@@ -3,12 +3,15 @@ from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from .database import engine, Base
-from .routes import auth
+from .routes import auth, users
 from . import models
 from .limiter import limiter
 
 # Create database tables
-Base.metadata.create_all(bind=engine)
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Database connection failed, skipping table creation: {e}")
 
 app = FastAPI(title="HackAI 2026 API")
 app.state.limiter = limiter
@@ -31,3 +34,4 @@ async def health_check():
     return {"status": "ok"}
 
 app.include_router(auth.router)
+app.include_router(users.router, prefix="/api/users", tags=["users"])
