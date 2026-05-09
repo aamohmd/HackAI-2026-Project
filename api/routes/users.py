@@ -22,6 +22,24 @@ def get_me(current_user: User = Depends(get_current_user)):
 def get_preferences(current_user: User = Depends(get_current_user)):
     return current_user.preferences
 
+@router.patch("/me/preferences", response_model=UserPreferenceRead)
+def update_preferences(
+    preference_update: UserPreferenceUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    preferences = current_user.preferences
+    if not preferences:
+        raise HTTPException(status_code=404, detail="Preferences not found")
+    
+    update_data = preference_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(preferences, key, value)
+    
+    db.commit()
+    db.refresh(preferences)
+    return preferences
+
 @router.patch("/me", response_model=UserRead)
 def update_profile(
     user_update: UserUpdate,
