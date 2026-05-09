@@ -55,7 +55,7 @@ export function AvatarUpload({ currentAvatarUrl }: AvatarUploadProps) {
       >
         {currentAvatarUrl ? (
           <img 
-            src={currentAvatarUrl.startsWith('http') ? currentAvatarUrl : `${import.meta.env.VITE_API_TARGET || ''}${currentAvatarUrl}`} 
+            src={currentAvatarUrl} 
             alt="Avatar" 
             className="w-full h-full object-cover"
           />

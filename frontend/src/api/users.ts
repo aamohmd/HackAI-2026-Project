@@ -6,7 +6,7 @@ export interface UserUpdate {
   bio?: string;
 }
 
-export const userApi = {
+export const usersApi = {
   getMe: async (): Promise<User> => {
     const { data } = await api.get<User>('/users/me');
     return data;

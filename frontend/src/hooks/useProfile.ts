@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { userApi, UserUpdate } from '../api/users';
+import { usersApi, UserUpdate } from '../api/users';
 import type { User } from '../api/auth';
 
 export const useProfile = () => {
@@ -7,11 +7,11 @@ export const useProfile = () => {
 
   const { data: profile, isLoading, error } = useQuery({
     queryKey: ['profile'],
-    queryFn: userApi.getMe,
+    queryFn: usersApi.getMe,
   });
 
   const updateMutation = useMutation({
-    mutationFn: (userData: UserUpdate) => userApi.updateMe(userData),
+    mutationFn: (userData: UserUpdate) => usersApi.updateMe(userData),
     // Optimistic updates
     onMutate: async (newUserData) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
