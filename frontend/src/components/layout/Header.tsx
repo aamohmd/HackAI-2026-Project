@@ -1,14 +1,43 @@
 import { useAuth } from '@/hooks/useAuth';
-import { User } from "@phosphor-icons/react";
+import { User, List } from "@phosphor-icons/react";
 import { getUserDisplayName } from '@/lib/utils';
+import { useState } from 'react';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription
+} from '@/components/ui/dialog';
+import { SidebarContent } from './Sidebar';
+import { Button } from '@/components/ui/button';
 
 export function Header() {
   const { user } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <header className="h-16 border-b border-border bg-card flex items-center justify-end px-8 sticky top-0 z-10">
-      <div className="flex items-center gap-3">
-        <div className="text-right">
+    <header className="h-16 border-b border-border bg-card flex items-center justify-between px-4 md:px-8 sticky top-0 z-10">
+      <div className="flex items-center gap-2 md:hidden">
+        <Dialog open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+          <DialogTrigger asChild>
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <List size={24} />
+            </Button>
+          </DialogTrigger>
+          <DialogContent side="left" className="p-0 w-[280px]">
+            <div className="hidden">
+              <DialogTitle>Navigation Menu</DialogTitle>
+              <DialogDescription>Access dashboard links and account settings.</DialogDescription>
+            </div>
+            <SidebarContent onItemClick={() => setIsMobileMenuOpen(false)} />
+          </DialogContent>
+        </Dialog>
+        <span className="font-bold text-lg tracking-tight text-foreground">HackAI</span>
+      </div>
+
+      <div className="flex items-center gap-3 ml-auto">
+        <div className="text-right hidden sm:block">
           <p className="text-sm font-semibold text-foreground">
             {getUserDisplayName(user)}
           </p>
