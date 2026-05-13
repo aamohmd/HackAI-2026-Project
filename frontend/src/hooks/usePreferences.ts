@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { usersApi, type UserPreference } from '@/api/users';
+import { usersApi, type UserPreference } from '@/features/user-profile/api/users';
 import type { User } from '@/api/auth';
 
 export const usePreferences = () => {

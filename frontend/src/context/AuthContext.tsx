@@ -1,7 +1,7 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/features/auth';
-import { usersApi } from '../api/users';
+import { usersApi } from '@/features/user-profile/api/users';
 import type { User } from '@/features/auth';
 import { setAccessToken } from '@/shared/api/client';
 

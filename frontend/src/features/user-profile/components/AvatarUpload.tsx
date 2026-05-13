@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { Camera, CircleNotch, User } from "@phosphor-icons/react";
-import { usersApi } from '@/api/users';
+import { usersApi } from '../api/users';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface AvatarUploadProps {

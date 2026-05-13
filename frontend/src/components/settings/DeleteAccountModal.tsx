@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/features/auth';
-import { usersApi } from '@/api/users';
+import { usersApi } from '@/features/user-profile/api/users';
 import {
   Dialog,
   DialogContent,
