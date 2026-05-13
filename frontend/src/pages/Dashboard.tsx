@@ -1,5 +1,5 @@
 import { Briefcase, CheckCircle, ListChecks } from "@phosphor-icons/react";
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/features/auth';
 import { getUserDisplayName } from '@/shared/lib/utils';
 
 export default function DashboardPage() {

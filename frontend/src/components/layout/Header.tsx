@@ -1,4 +1,4 @@
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/features/auth';
 import { User, List } from "@phosphor-icons/react";
 import { getUserDisplayName } from '@/shared/lib/utils';
 import { useState } from 'react';
