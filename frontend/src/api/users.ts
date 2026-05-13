@@ -1,5 +1,5 @@
-import api from './client';
-import type { User } from './auth';
+import api from '@/shared/api/client';
+import type { User } from '@/features/auth';
 
 export interface UserUpdate {
   full_name?: string;

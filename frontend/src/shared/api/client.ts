@@ -44,7 +44,7 @@ api.interceptors.response.use(
       
       try {
         // Import dynamically to avoid circular dependency
-        const { authApi } = await import('@/api/auth');
+        const { authApi } = await import('@/features/auth');
         const { access_token } = await authApi.refresh();
         
         setAccessToken(access_token);
