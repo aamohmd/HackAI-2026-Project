@@ -1,6 +1,6 @@
 import { Briefcase, CheckCircle, ListChecks } from "@phosphor-icons/react";
 import { useAuth } from '@/hooks/useAuth';
-import { getUserDisplayName } from '@/lib/utils';
+import { getUserDisplayName } from '@/shared/lib/utils';
 
 export default function DashboardPage() {
   const { user } = useAuth();

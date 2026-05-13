@@ -1,6 +1,6 @@
 import React from 'react';
 import { Gear, Bell, PaintBrush, WarningCircle } from "@phosphor-icons/react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 const tabs = [
   { id: 'general', label: 'General', icon: Gear },

@@ -1,6 +1,6 @@
 import { useAuth } from '@/hooks/useAuth';
 import { User, List } from "@phosphor-icons/react";
-import { getUserDisplayName } from '@/lib/utils';
+import { getUserDisplayName } from '@/shared/lib/utils';
 import { useState } from 'react';
 import { 
   Dialog, 
@@ -8,9 +8,9 @@ import {
   DialogTrigger,
   DialogTitle,
   DialogDescription
-} from '@/components/ui/dialog';
+} from '@/shared/ui/dialog';
 import { SidebarContent } from './Sidebar';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/shared/ui/button';
 
 export function Header() {
   const { user } = useAuth();

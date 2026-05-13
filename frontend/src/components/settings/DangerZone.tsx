@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { WarningCircle } from "@phosphor-icons/react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/shared/ui/card';
+import { Button } from '@/shared/ui/button';
 import { DeleteAccountModal } from './DeleteAccountModal';
 
 export const DangerZone: React.FC = () => {

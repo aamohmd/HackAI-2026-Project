@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { SignOut, FlyingSaucer } from "@phosphor-icons/react";
 import { useAuth } from '@/hooks/useAuth';
-import { cn } from '@/lib/utils';
+import { cn } from '@/shared/lib/utils';
 import { navItems } from '@/config/navigation';
 
 interface SidebarContentProps {

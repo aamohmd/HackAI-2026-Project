@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '../api/auth';
 import { usersApi } from '../api/users';
 import type { User } from '../api/auth';
-import { setAccessToken } from '../api/client';
+import { setAccessToken } from '@/shared/api/client';
 
 interface AuthContextType {
   user: User | null;

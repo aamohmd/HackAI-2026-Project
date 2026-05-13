@@ -1,8 +1,8 @@
 import React from 'react';
 import { Sun, Moon, Desktop } from "@phosphor-icons/react";
 import { useTheme } from '@/context/ThemeContext';
-import { cn } from '@/lib/utils';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { cn } from '@/shared/lib/utils';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/shared/ui/card';
 
 export const AppearanceSection: React.FC = () => {
   const { theme, setTheme } = useTheme();

@@ -4,7 +4,7 @@ import { AppearanceSection } from '@/components/settings/AppearanceSection';
 import { GeneralSection } from '@/components/settings/GeneralSection';
 import { NotificationSection } from '@/components/settings/NotificationSection';
 import { DangerZone } from '@/components/settings/DangerZone';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/shared/ui/card';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
