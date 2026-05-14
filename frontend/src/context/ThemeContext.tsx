@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { usePreferences } from '@/hooks/usePreferences';
+import { usePreferences } from '@/features/settings';
 
 type Theme = 'light' | 'dark' | 'system';
 

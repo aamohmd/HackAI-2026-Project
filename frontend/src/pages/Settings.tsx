@@ -1,9 +1,5 @@
 import { useState } from 'react';
-import { SettingsTabs } from '@/components/settings/SettingsTabs';
-import { AppearanceSection } from '@/components/settings/AppearanceSection';
-import { GeneralSection } from '@/components/settings/GeneralSection';
-import { NotificationSection } from '@/components/settings/NotificationSection';
-import { DangerZone } from '@/components/settings/DangerZone';
+import { SettingsTabs, AppearanceSection, GeneralSection, NotificationSection, DangerZone } from '@/features/settings';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/shared/ui/card';
 
 export default function SettingsPage() {
