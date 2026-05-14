@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersApi, type UserUpdate } from '../api/users';
-import type { User } from '../api/auth';
+import type { User } from '@/features/auth';
 
 export const useProfile = () => {
   const queryClient = useQueryClient();
@@ -32,7 +32,7 @@ export const useProfile = () => {
       return { previousProfile };
     },
     // If the mutation fails, use the context returned from onMutate to roll back
-    onError: (err, newUserData, context) => {
+    onError: (_err, _newUserData, context) => {
       if (context?.previousProfile) {
         queryClient.setQueryData(['profile'], context.previousProfile);
       }

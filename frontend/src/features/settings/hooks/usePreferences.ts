@@ -1,13 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { usersApi, type UserPreference } from '@/features/user-profile/api/users';
-import type { User } from '@/api/auth';
 
 export const usePreferences = () => {
   const queryClient = useQueryClient();
 
   const { data: preferences, isLoading, error } = useQuery({
     queryKey: ['preferences'],
-    queryFn: usersApi.getMePreferences, // I need to add this to usersApi
+    queryFn: usersApi.getMePreferences,
   });
 
   const updateMutation = useMutation({
@@ -20,7 +19,7 @@ export const usePreferences = () => {
       }
       return { previous };
     },
-    onError: (err, newData, context) => {
+    onError: (_err, _newData, context) => {
       if (context?.previous) {
         queryClient.setQueryData(['preferences'], context.previous);
       }

@@ -44,33 +44,33 @@
   }
 
   .dark {
-    --background: 222 47% 11%;
+    --background: 0 0% 0%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 11%;
+    --card: 0 0% 3%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 11%;
+    --popover: 0 0% 3%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 199 89% 48%;
+    --primary: 199 89% 55%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 217 33% 18%;
+    --secondary: 217 33% 12%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 33% 18%;
+    --muted: 217 33% 12%;
     --muted-foreground: 215 20% 65%;
 
-    --accent: 217 33% 18%;
+    --accent: 217 33% 12%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 63% 31%;
+    --destructive: 0 63% 40%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 33% 18%;
-    --input: 217 33% 18%;
-    --ring: 199 89% 48%;
+    --border: 217 33% 15%;
+    --input: 217 33% 15%;
+    --ring: 199 89% 55%;
   }
 }
 
@@ -79,13 +79,25 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-family: "Figtree", sans-serif;
   }
 }
 
-/* Force Luma style components to follow our global radius */
+/* Senior UI Utilities */
 @layer utilities {
+  .glass {
+    @apply bg-background/60 backdrop-blur-xl border-border/50;
+  }
+  
+  .glow-primary {
+    box-shadow: 0 0 20px -5px hsl(var(--primary) / 0.3);
+  }
+
+  .glow-primary-hover:hover {
+    box-shadow: 0 0 25px -2px hsl(var(--primary) / 0.4);
+  }
+
   .rounded-4xl, .rounded-3xl, .rounded-2xl {
     border-radius: var(--radius) !important;
   }

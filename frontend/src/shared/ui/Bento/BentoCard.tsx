@@ -1,5 +1,5 @@
 // frontend/src/shared/ui/Bento/BentoCard.tsx
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 import { cn } from "@/shared/lib/utils";
 
 interface BentoCardProps {
@@ -17,13 +17,16 @@ export function BentoCard({ children, className, span = 4 }: BentoCardProps) {
 
   return (
     <div className={cn(
-      "p-6 bg-card border border-border rounded-lg shadow-sm transition-all duration-300",
-      "hover:border-primary/50 hover:shadow-md group relative overflow-hidden",
+      "p-6 glass rounded-lg shadow-sm transition-all duration-500",
+      "hover:border-primary/50 hover:shadow-[0_0_30px_-10px_rgba(var(--primary),0.2)] group relative overflow-hidden",
       spanClass,
       className
     )}>
+      {/* Dynamic Border Beam Effect */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite] pointer-events-none" />
+      
       {/* Radial Glow Effect */}
-      <div className="absolute inset-0 bg-radial-gradient from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+      <div className="absolute inset-0 bg-radial-gradient from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
       <div className="relative z-10 h-full">
         {children}
       </div>

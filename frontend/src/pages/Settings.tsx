@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { SettingsTabs, AppearanceSection, GeneralSection, NotificationSection, DangerZone } from '@/features/settings';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/shared/ui/card';
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState('general');
