@@ -17,7 +17,7 @@ export function BentoCard({ children, className, span = 4 }: BentoCardProps) {
 
   return (
     <div className={cn(
-      "p-6 glass rounded-lg shadow-sm transition-all duration-500",
+      "p-6 glass rounded-2xl shadow-sm transition-all duration-500 border border-white/10",
       "hover:border-primary/50 hover:shadow-[0_0_30px_-10px_rgba(var(--primary),0.2)] group relative overflow-hidden",
       spanClass,
       className

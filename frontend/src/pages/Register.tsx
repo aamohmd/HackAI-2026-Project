@@ -48,7 +48,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background px-4 font-sans">
+    <div className="flex items-center justify-center min-h-screen px-4 font-sans">
       <Card className="w-full max-w-md shadow-lg border-border/50">
         <CardHeader className="space-y-2 p-6">
           <div className="flex justify-center mb-2">
