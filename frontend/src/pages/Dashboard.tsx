@@ -1,6 +1,7 @@
 import { Briefcase, CheckCircle, ListChecks } from "@phosphor-icons/react";
 import { useAuth } from '@/features/auth';
 import { getUserDisplayName } from '@/shared/lib/utils';
+import { BentoGrid, BentoCard } from "@/shared/ui/Bento";
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -40,13 +41,10 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <BentoGrid>
         {stats.map((stat) => (
-          <div 
-            key={stat.label} 
-            className="p-6 bg-card border border-border rounded-lg shadow-sm transition-all hover:border-primary/50 hover:shadow-md"
-          >
-            <div className="flex items-center justify-between">
+          <BentoCard key={stat.label} span={4}>
+            <div className="flex items-center justify-between h-full">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
                 <p className="text-3xl font-bold mt-2 text-foreground">{stat.value}</p>
@@ -55,20 +53,20 @@ export default function DashboardPage() {
                 <stat.icon size={28} weight="bold" className={stat.color} />
               </div>
             </div>
-          </div>
+          </BentoCard>
         ))}
-      </div>
 
-      {/* Placeholder for Recent Activity */}
-      <div className="bg-card border border-border rounded-lg p-8 border-dashed flex flex-col items-center justify-center text-center">
-        <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
-          <ListChecks size={24} className="text-muted-foreground" />
-        </div>
-        <h3 className="font-semibold text-lg">No recent activity</h3>
-        <p className="text-muted-foreground max-w-xs mt-1">
-          When you start working on projects, your recent activity will show up here.
-        </p>
-      </div>
+        {/* Placeholder for Recent Activity */}
+        <BentoCard span={12} className="flex flex-col items-center justify-center text-center py-12 border-dashed">
+          <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
+            <ListChecks size={24} className="text-muted-foreground" />
+          </div>
+          <h3 className="font-semibold text-lg">No recent activity</h3>
+          <p className="text-muted-foreground max-w-xs mt-1">
+            When you start working on projects, your recent activity will show up here.
+          </p>
+        </BentoCard>
+      </BentoGrid>
     </div>
   );
 }
