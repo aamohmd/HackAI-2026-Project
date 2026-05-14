@@ -60,17 +60,18 @@ export function FloatingIslandNav() {
                       key={item.href}
                       to={item.href}
                       onClick={() => setIsOpen(false)}
-                      className={({ isActive }) =>
-                        cn(
+                    >
+                      {({ isActive }) => (
+                        <div className={cn(
                           "flex items-center gap-4 px-4 py-4 rounded-2xl transition-all border",
                           isActive
                             ? "bg-card text-foreground border-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]"
                             : "text-muted-foreground border-transparent hover:text-foreground hover:bg-accent/50"
-                        )
-                      }
-                    >
-                      <item.icon size={24} weight={({ isActive }: any) => isActive ? "bold" : "regular"} />
-                      <span className="font-bold">{item.label}</span>
+                        )}>
+                          <item.icon size={24} weight={isActive ? "bold" : "regular"} />
+                          <span className="font-bold">{item.label}</span>
+                        </div>
+                      )}
                     </NavLink>
                   ))}
                 </nav>
