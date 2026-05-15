@@ -42,7 +42,7 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Button size="lg" className="h-16 px-10 text-xl gap-3 rounded-full transition-all">
+          <Button size="lg" variant="primary" className="h-16 px-10 text-xl gap-3 transition-all">
             <RocketLaunch size={28} weight="bold" />
             CTA PLACEHOLDER
           </Button>

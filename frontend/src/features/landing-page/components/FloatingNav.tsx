@@ -36,7 +36,7 @@ export function FloatingNav() {
         ) : (
           <>
             <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Login</Link>
-            <Button size="sm" variant="default" asChild className="px-6">
+            <Button size="sm" variant="primary" asChild className="px-6">
               <Link to="/register">Join HackAI</Link>
             </Button>
           </>
