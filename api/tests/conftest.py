@@ -56,7 +56,7 @@ def client():
 @pytest.fixture
 def test_user(db):
     user = User(
-        email="test@example.com",
+        phone_number="+212600000000",
         hashed_password=get_password_hash("testpassword"),
         full_name="Test User",
         is_active=True

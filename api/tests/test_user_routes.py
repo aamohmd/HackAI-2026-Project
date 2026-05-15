@@ -6,7 +6,7 @@ from datetime import timedelta
 @pytest.fixture
 def test_user(db):
     user = User(
-        email="testuser_routes@example.com",
+        phone_number="+212600000000",
         hashed_password="hashedpassword",
         full_name="Test User",
         is_active=True
@@ -34,7 +34,7 @@ def test_update_user_profile(client, test_user):
     data = response.json()
     assert data["full_name"] == "Updated Name"
     assert data["bio"] == "New Bio"
-    assert data["email"] == user.email
+    assert data["phone_number"] == user.phone_number
 
 def test_get_user_profile(client, test_user):
     user, token = test_user
@@ -46,7 +46,7 @@ def test_get_user_profile(client, test_user):
     
     assert response.status_code == 200
     data = response.json()
-    assert data["email"] == user.email
+    assert data["phone_number"] == user.phone_number
     assert data["full_name"] == user.full_name
 
 def test_update_user_profile_unauthorized(client):

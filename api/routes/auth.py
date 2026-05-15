@@ -58,12 +58,15 @@ def set_refresh_cookie(response: Response, refresh_token: str):
 @router.post("/register", response_model=UserRead)
 @limiter.limit("5/minute")
 def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.email == user.email).first()
+    db_user = db.query(User).filter(User.phone_number == user.phone_number).first()
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        raise HTTPException(status_code=400, detail="Phone number already registered")
+    
+    # SMS Simulation
+    print(f"\n[SMS SIMULATION] Sent verification code 1234 to {user.phone_number}\n")
     
     hashed_pwd = get_password_hash(user.password)
-    new_user = User(email=user.email, hashed_password=hashed_pwd)
+    new_user = User(phone_number=user.phone_number, hashed_password=hashed_pwd)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -72,11 +75,12 @@ def register(request: Request, user: UserCreate, db: Session = Depends(get_db)):
 @router.post("/login", response_model=Token)
 @limiter.limit("5/minute")
 def login(request: Request, response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == form_data.username).first()
+    # form_data.username will now represent the phone number
+    user = db.query(User).filter(User.phone_number == form_data.username).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Incorrect phone number or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     

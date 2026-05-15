@@ -3,7 +3,7 @@ import pytest
 
 def test_user_schemas():
     user_data = {
-        "email": "test@example.com",
+        "phone_number": "+212600000000",
         "password": "password123",
         "full_name": "John Doe",
         "bio": "Hello",
@@ -12,7 +12,7 @@ def test_user_schemas():
     
     # Test UserCreate
     user_create = UserCreate(**user_data)
-    assert user_create.email == "test@example.com"
+    assert user_create.phone_number == "+212600000000"
     assert user_create.full_name == "John Doe"
     assert user_create.bio == "Hello"
     assert user_create.avatar_url == "/uploads/avatar.png"
@@ -20,7 +20,7 @@ def test_user_schemas():
     # Test UserRead
     user_read_data = {
         "id": "123",
-        "email": "test@example.com",
+        "phone_number": "+212600000000",
         "is_active": True,
         "full_name": "John Doe",
         "bio": "Hello",
@@ -34,7 +34,7 @@ def test_user_schemas():
 
 def test_user_schemas_optional():
     user_data = {
-        "email": "test@example.com",
+        "phone_number": "+212600000000",
         "password": "password123"
     }
     user_create = UserCreate(**user_data)
