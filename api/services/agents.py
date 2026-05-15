@@ -1,12 +1,13 @@
 from pydantic import BaseModel
 from typing import Optional
 import os
-from openai import OpenAI
+from groq import Groq
 from dotenv import load_dotenv
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Use Groq - The fastest LLM provider for your hackathon
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 class LandDisputeState(BaseModel):
     claimant_name: Optional[str] = None
@@ -29,7 +30,7 @@ Output MUST be a valid JSON matching the schema.
 SYSTEM_PROMPT_INTERVIEWER = """
 You are a supportive legal assistant in Morocco. 
 The user is a rural farmer who might be illiterate. 
-Speak in friendly, clear Moroccan Darija.
+Speak in friendly, clear Moroccan Darija (written phonetically).
 Based on the current extracted facts, identify what is missing and ask ONE follow-up question.
 Missing facts prioritize: Location, Opponent Name, Proof Type.
 If all major facts are present, thank the user and say the brief is being prepared.
@@ -38,7 +39,7 @@ If all major facts are present, thank the user and say the brief is being prepar
 def extract_facts(transcript: str, current_state: LandDisputeState) -> LandDisputeState:
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="llama-3.3-70b-versatile", # High reasoning for extraction
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT_EXTRACTOR},
                 {"role": "user", "content": f"Current State: {current_state.model_dump_json()}\nNew Transcript: {transcript}"}
@@ -54,7 +55,7 @@ def extract_facts(transcript: str, current_state: LandDisputeState) -> LandDispu
 def get_next_question(state: LandDisputeState) -> str:
     try:
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="llama-3.1-8b-instant", # Ultra-fast for chat responses
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT_INTERVIEWER},
                 {"role": "user", "content": f"Current State: {state.model_dump_json()}"}

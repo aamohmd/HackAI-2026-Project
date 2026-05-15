@@ -30,13 +30,15 @@ export const MobileHub = () => {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      const { updated_state, audio_url } = response.data;
+      const { updated_state, next_question } = response.data;
       setCaseState(updated_state);
-      setAudioUrl(audio_url);
 
-      // Autoplay the AI response
-      const audio = new Audio(audio_url);
-      audio.play();
+      // Browser-native TTS (Free & Instant)
+      if ('speechSynthesis' in window && next_question) {
+        const utterance = new SpeechSynthesisUtterance(next_question);
+        utterance.lang = 'ar-XA'; // Attempt Arabic voice
+        window.speechSynthesis.speak(utterance);
+      }
     } catch (err) {
       console.error("Error processing voice:", err);
     } finally {

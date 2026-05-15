@@ -7,3 +7,4 @@ pydantic[email]
 python-multipart
 argon2-cffi
 slowapi
+groq
