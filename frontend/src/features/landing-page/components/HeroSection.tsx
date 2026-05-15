@@ -25,9 +25,9 @@ export function HeroSection() {
         <motion.h1 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-6xl md:text-9xl font-black tracking-tighter text-foreground"
+          className="text-6xl md:text-9xl font-black tracking-tighter text-foreground uppercase glow-primary"
         >
-          HACK<span className="text-primary glow-primary">AI</span>
+          HACKAI
         </motion.h1>
         <motion.p 
           initial={{ opacity: 0, y: 20 }}
@@ -42,7 +42,7 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <Button size="lg" className="h-16 px-10 text-xl gap-3 rounded-full glow-primary-hover transition-all">
+          <Button size="lg" className="h-16 px-10 text-xl gap-3 rounded-full transition-all">
             <RocketLaunch size={28} weight="bold" />
             CTA PLACEHOLDER
           </Button>
