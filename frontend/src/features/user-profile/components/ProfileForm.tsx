@@ -55,52 +55,54 @@ export const ProfileForm: React.FC = () => {
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto shadow-sm p-8">
-      <CardHeader className="px-0 pt-0">
+    <Card className="w-full shadow-sm">
+      <CardHeader className="p-8 pb-0">
         <CardTitle className="text-2xl font-bold">Account Settings</CardTitle>
         <CardDescription>
           Update your profile information and manage how others see you.
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <CardContent className="space-y-6 px-0">
-          <div className="flex justify-center py-4">
+        <CardContent className="space-y-6 p-8">
+          <div className="flex justify-start py-4">
             <AvatarUpload currentAvatarUrl={profile?.avatar_url} />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              Email Address
-            </label>
-            <Input
-              value={profile?.email || ''}
-              readOnly
-              className="bg-muted cursor-not-allowed border-none"
-              title="Email cannot be changed"
-            />
-            <p className="text-[0.8rem] text-muted-foreground">
-              Your email address is used for sign in and notifications.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <label 
-              htmlFor="full_name"
-              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-            >
-              Full Name
-            </label>
-            <Input
-              id="full_name"
-              placeholder="John Doe"
-              {...register('full_name')}
-              aria-invalid={!!errors.full_name}
-            />
-            {errors.full_name && (
-              <p className="text-[0.8rem] font-medium text-destructive">
-                {errors.full_name.message}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Phone Number
+              </label>
+              <Input
+                value={profile?.phone_number || ''}
+                readOnly
+                className="bg-muted cursor-not-allowed border-none"
+                title="Phone number cannot be changed"
+              />
+              <p className="text-[0.8rem] text-muted-foreground">
+                Used for sign in and identity.
               </p>
-            )}
+            </div>
+
+            <div className="space-y-2">
+              <label 
+                htmlFor="full_name"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Full Name
+              </label>
+              <Input
+                id="full_name"
+                placeholder="John Doe"
+                {...register('full_name')}
+                aria-invalid={!!errors.full_name}
+              />
+              {errors.full_name && (
+                <p className="text-[0.8rem] font-medium text-destructive">
+                  {errors.full_name.message}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -113,7 +115,7 @@ export const ProfileForm: React.FC = () => {
             <Textarea
               id="bio"
               placeholder="Tell us about yourself..."
-              className="resize-none"
+              className="resize-none min-h-[120px]"
               {...register('bio')}
               aria-invalid={!!errors.bio}
             />
@@ -127,11 +129,11 @@ export const ProfileForm: React.FC = () => {
             </p>
           </div>
         </CardContent>
-        <CardFooter className="px-0 pb-0 pt-6">
+        <CardFooter className="p-8 pt-0 flex justify-end">
           <Button 
             type="submit" 
             disabled={isUpdating || !isDirty}
-            className="w-full sm:w-auto px-8"
+            className="w-full sm:w-auto px-8 h-11"
           >
             {isUpdating ? (
               <>

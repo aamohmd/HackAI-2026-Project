@@ -5,7 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function getUserDisplayName(user: { full_name?: string | null; email: string } | null | undefined) {
+export function getUserDisplayName(user: { full_name?: string | null; phone_number: string } | null | undefined) {
   if (!user) return "User";
-  return user.full_name || user.email.split('@')[0];
+  return user.full_name || user.phone_number;
 }

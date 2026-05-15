@@ -40,7 +40,7 @@ export function UserMenu({ className, align = 'right' }: UserMenuProps) {
             <CaretDown size={12} className={cn('transition-transform', isUserMenuOpen && 'rotate-180')} />
           </p>
           <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium opacity-60">
-            {user?.email}
+            {user?.phone_number}
           </p>
         </div>
         <div className="w-10 h-10 rounded-full border border-border bg-muted flex items-center justify-center overflow-hidden ring-2 ring-transparent hover:ring-primary/20 transition-all">
