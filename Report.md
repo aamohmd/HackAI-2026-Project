@@ -1,44 +1,31 @@
-# Security Audit Report
+# Rural Rights Advocate - HackAI 2026
 
-## Overview
-A comprehensive security audit was performed on the HackAI 2026 Boilerplate application. The audit focused on the authentication logic (JWT), frontend token storage, dependency vulnerabilities, and general API configurations.
+## The Vision
+In Morocco's "Legal Deserts," millions of rural citizens lack access to qualified legal counsel. This leads to land encroachment, labor exploitation, and lost rights. **Rural Rights Advocate** is an AI-powered "Justice Kiosk" that uses a multi-agentic voice-first interview to bridge this gap.
 
-## Findings & Remediation Status
+## How it Works
+1.  **Voice Intake:** A farmer speaks their grievance in **Moroccan Darija**. No literacy required.
+2.  **Agentic Extraction:** A GPT-4o-mini agent extracts core legal facts (Who, What, Where, When).
+3.  **Intelligent Interview:** The AI identifies missing facts and asks follow-up questions in Darija to build a complete case.
+4.  **Professional Briefing:** The final output is a formal, professional Legal Brief in Modern Standard Arabic or French, ready for a lawyer or NGO worker.
 
-### 1. [RESOLVED] High Risk: XSS Exposure of Access Tokens
-*   **Issue:** Initially, tokens were stored in `localStorage`.
-*   **Remediation:** Implemented **HttpOnly Cookies** for the Refresh Token and **In-Memory** storage for the Access Token.
-*   **Benefit:** Long-lived session tokens are now physically inaccessible to malicious JavaScript.
+## The Business Model (Justice-as-a-Service)
+*   **B2B SaaS:** NGOs and Legal Aid societies pay for the platform to 10x their field workers' efficiency.
+*   **Referral Network:** Private lawyers pay a subscription to access "Pre-Packaged" case briefs, reducing their intake overhead.
+*   **Social Impact:** Zero cost for the rural poor.
 
-### 2. [PARTIAL] High Risk: Overly Permissive CORS Configuration
-*   **Location:** `api/main.py`
-*   **Issue:** `allow_origins` was set to `*`.
-*   **Remediation:** Restricted origins to `localhost:5173` and `127.0.0.1:5173`.
-*   **Next Step:** When deploying to production, update `api/main.py` with your final domain.
+## Technical Stack
+*   **Backend:** FastAPI (Python)
+*   **Agents:** OpenAI GPT-4o-mini (Orchestration & Logic)
+*   **Audio:** OpenAI Whisper (Transcription) & TTS-1 (Verbal Feedback)
+*   **Frontend:** React PWA (Vite + Tailwind) - Mobile First.
+*   **Database:** PostgreSQL (SQLAlchemy)
 
-### 3. [RESOLVED] Medium Risk: Brute Force Vulnerability
-*   **Location:** `api/routes/auth.py`
-*   **Issue:** No protection against automated password guessing.
-*   **Remediation:** Implemented **Rate Limiting** using `slowapi`.
-*   **Limits:** 
-    *   `/auth/login`: 5 attempts per minute.
-    *   `/auth/register`: 5 attempts per minute.
-    *   `/auth/refresh`: 20 attempts per minute.
+## 24h Hackathon Deliverables
+- [x] **Phone-Based Authentication:** Realistic rural access.
+- [x] **Push-to-Talk Interview Hub:** Optimized for mobile.
+- [x] **Agentic Fact Extraction:** Turning messy stories into structured data.
+- [x] **PWA Support:** Installable on any phone.
+- [x] **Real-time Feedback Grid:** Visualizing the AI's "Thought Process."
 
-### 4. [RESOLVED] Medium Risk: Predictable Secret Key Fallback
-*   **Location:** `api/routes/auth.py`
-*   **Issue:** Backend defaulted to `"yoursecretkeyhere"` if `.env` was missing.
-*   **Remediation:** Updated `api/database.py` to log high-visibility warnings if variables are missing. 
-*   **Next Step:** For production, ensure the app fails to start if `SECRET_KEY` is not provided.
-
-### 5. [RESOLVED] Low Risk: Unverifiable Token Revocation
-*   **Issue:** Stateless JWTs couldn't be easily revoked.
-*   **Remediation:** Implemented a **Dual-Token System**. The short-lived Access Token (15m) minimizes the window of abuse, and Logout now explicitly clears the Refresh Token cookie.
-
-### 6. Dependency Vulnerability: Minerva Timing Attack in `ecdsa` (CVE-2024-23342)
-*   **Scanner:** OSV Scanner (GHSA-wj6h-64fc-37mp)
-*   **Status:** **False Positive.**
-*   **Context:** We use `HS256` (symmetric HMAC), which does not use the vulnerable ECDSA code paths. We are completely unaffected.
-
-## Conclusion
-The boilerplate now follows security best practices for modern web applications. The combination of **HttpOnly Cookies**, **Argon2 Hashing**, and **Rate Limiting** provides a robust defense for the upcoming hackathon.
+**Built with ❤️ for rural communities by the HackAI 2026 Team.**

@@ -1,0 +1,16 @@
+{
+  "name": "Rural Rights Advocate",
+  "short_name": "JusticeApp",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#0ea5e9",
+  "description": "AI-powered legal assistance for rural Moroccan populations.",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
