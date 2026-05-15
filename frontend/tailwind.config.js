@@ -63,6 +63,11 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        'aura-sm': '0 0 15px rgba(var(--primary-rgb), 0.1)',
+        'aura-md': '0 0 25px rgba(var(--primary-rgb), 0.2)',
+        'aura-lg': '0 0 35px rgba(var(--primary-rgb), 0.4)',
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
