@@ -1,8 +1,9 @@
 import React from 'react';
-import { Gear, Bell, PaintBrush, WarningCircle } from "@phosphor-icons/react";
+import { Gear, Bell, PaintBrush, WarningCircle, User } from "@phosphor-icons/react";
 import { cn } from "@/shared/lib/utils";
 
 const tabs = [
+  { id: 'profile', label: 'Profile', icon: User },
   { id: 'general', label: 'General', icon: Gear },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'appearance', label: 'Appearance', icon: PaintBrush },
@@ -16,23 +17,30 @@ interface SettingsTabsProps {
 
 export const SettingsTabs: React.FC<SettingsTabsProps> = ({ activeTab, onTabChange }) => {
   return (
-    <nav className="flex flex-col gap-1 w-full md:w-64">
+    <nav className="flex flex-col gap-2 w-full md:w-64 relative z-10">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
           className={cn(
-            "flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 text-sm font-medium",
+            "group flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-sm font-bold tracking-tight relative overflow-hidden border",
             activeTab === tab.id
-              ? "bg-primary text-primary-foreground shadow-sm"
+              ? "bg-card text-foreground border-primary shadow-[0_0_20px_rgba(var(--primary),0.3)]"
               : cn(
-                  "text-muted-foreground hover:text-foreground hover:bg-accent",
-                  tab.id === 'danger' && "hover:text-destructive hover:bg-destructive/10"
+                  "text-muted-foreground border-transparent hover:text-foreground hover:bg-accent/50 hover:border-border/50",
+                  tab.id === 'danger' && "hover:text-destructive hover:bg-destructive/10 hover:border-destructive/20"
                 )
           )}
         >
-          <tab.icon size={20} weight={activeTab === tab.id ? "bold" : "regular"} />
-          {tab.label}
+          <tab.icon 
+            size={20} 
+            className="transition-transform group-hover:scale-110"
+            weight={activeTab === tab.id ? "bold" : "regular"} 
+          />
+          <span className="relative z-10">{tab.label}</span>
+          
+          {/* Hover Radial Glow */}
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-radial-gradient from-primary/5 to-transparent transition-opacity pointer-events-none" />
         </button>
       ))}
     </nav>

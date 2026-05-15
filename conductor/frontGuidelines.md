@@ -9,6 +9,7 @@ To ensure a consistent and professional look during the hackathon, please follow
     *   Use `font-sans` for body text.
     *   Use `font-heading` (also Figtree) for titles and headers.
     *   **Weights:** 400 (Regular), 500 (Medium), 600 (Semi-Bold), 700 (Bold).
+    *   **Colors:** All words must use a **single color**. Never split a word into two colors.
 
 ## 2. Color Palette
 
@@ -25,12 +26,13 @@ We use the [Phosphor Icons](https://phosphoricons.com/) library. It provides a c
 
 *   **Usage:**
     ```tsx
-    import { FlyingSaucer, User, SignOut } from "@phosphor-icons/react";
+    import { User, SignOut } from "@phosphor-icons/react";
 
     // Standard size: 24 or 32
     <User size={24} weight="regular" />
     ```
 *   **Weight:** Prefer `regular` for standard UI and `bold` for active states or headers.
+*   **Logo:** Do not use any icons (like FlyingSaucer) in the main platform logo.
 
 ## 4. Components: shadcn/ui
 
@@ -56,6 +58,19 @@ Consistency in spacing is key to a "premium" feel. We follow a strict spacing sc
 *   **Buttons:**
     *   Standard height: `h-10` or `h-11`.
     *   Use `gap-2` for icons inside buttons.
+
+## 6. Page Architecture: Dashboard
+
+All dashboard pages must follow a consistent layout and header style to maintain the "AI Workbench" aesthetic.
+
+*   **PageContainer**: Use the `PageContainer` component as the root wrapper for every dashboard page. It provides the signature dotted grid background, consistent vertical spacing (`space-y-12`), and a centralized max-width.
+*   **PageHeader**: Every page must start with the `PageHeader` component.
+    *   **Title**: Must be passed as a string. It is automatically converted to uppercase and styled with the `glow-primary` high-contrast effect.
+    *   **Description**: Use to provide context for the page's contents.
+*   **Consistency Rules**:
+    *   Never implement manual background patterns or headers within individual pages.
+    *   Always use `relative z-10` on main content containers to ensure they appear above the background grid.
+    *   Maintain a clear hierarchy: PageHeader -> Spacing (handled by Container) -> Content.
 
 ## 7. Borders and Hover Effects
 

@@ -1,5 +1,6 @@
 // frontend/src/pages/Landing.tsx
 import { FloatingNav, HeroSection, BentoRevealGrid } from "@/features/landing-page";
+import { Footer } from "@/components/layout/Footer";
 
 export default function LandingPage() {
   return (
@@ -18,7 +19,7 @@ export default function LandingPage() {
       </div>
 
       {/* Content continuation */}
-      <section className="relative z-40 pt-32 pb-64 px-4">
+      <section className="relative z-40 pt-32 pb-32 px-4">
         <div className="max-w-4xl mx-auto text-center space-y-12">
           <h2 className="text-4xl md:text-6xl font-bold tracking-tight text-foreground">The Future of AI is Collaborative.</h2>
           <p className="text-xl text-muted-foreground leading-relaxed">
@@ -29,6 +30,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <Footer variant="landing" />
     </main>
   );
 }

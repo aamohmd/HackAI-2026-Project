@@ -1,8 +1,8 @@
 import api from '@/shared/api/client';
 
 export interface User {
-  id: number;
-  email: string;
+  id: string;
+  phone_number: string;
   is_active: boolean;
   full_name?: string;
   bio?: string;
@@ -15,15 +15,15 @@ export interface Token {
 }
 
 export const authApi = {
-  register: async (email: string, password: string): Promise<User> => {
-    const { data } = await api.post<User>('/auth/register', { email, password });
+  register: async (phone_number: string, password: string): Promise<User> => {
+    const { data } = await api.post<User>('/auth/register', { phone_number, password });
     return data;
   },
 
-  login: async (email: string, password: string): Promise<Token> => {
+  login: async (phone_number: string, password: string): Promise<Token> => {
     // FastAPI's OAuth2PasswordRequestForm expects form data
     const formData = new FormData();
-    formData.append('username', email);
+    formData.append('username', phone_number);
     formData.append('password', password);
 
     const { data } = await api.post<Token>('/auth/login', formData, {

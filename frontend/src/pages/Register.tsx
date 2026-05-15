@@ -7,10 +7,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { EnvelopeSimple, LockSimple, UserPlus } from "@phosphor-icons/react";
+import { Phone, LockSimple, UserPlus } from "@phosphor-icons/react";
 
 const registerSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
+  phone_number: z.string().min(10, { message: "Invalid phone number" }),
   password: z.string().min(6, { message: "Password must be at least 6 characters" }),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -38,10 +38,10 @@ export default function RegisterPage() {
     setIsLoading(true);
     setError(null);
     try {
-      await registerUser(data.email, data.password);
-      navigate('/dashboard');
+      await registerUser(data.phone_number, data.password);
+      navigate('/');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to register. Email might already be in use.');
+      setError(err.response?.data?.detail || 'Failed to register. Phone number might already be in use.');
     } finally {
       setIsLoading(false);
     }
@@ -69,18 +69,18 @@ export default function RegisterPage() {
               </div>
             )}
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium flex items-center gap-2 px-0.5">
-                <EnvelopeSimple size={18} /> Email
+              <label htmlFor="phone_number" className="text-sm font-medium flex items-center gap-2 px-0.5">
+                <Phone size={18} /> Phone Number
               </label>
               <Input
-                id="email"
-                type="email"
-                placeholder="name@company.com"
-                {...register('email')}
-                className={errors.email ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}
+                id="phone_number"
+                type="tel"
+                placeholder="+212600000000"
+                {...register('phone_number')}
+                className={errors.phone_number ? 'border-destructive focus-visible:ring-destructive' : 'focus-visible:ring-primary'}
               />
-              {errors.email && (
-                <p className="text-xs text-destructive mt-1.5 px-0.5">{errors.email.message}</p>
+              {errors.phone_number && (
+                <p className="text-xs text-destructive mt-1.5 px-0.5">{errors.phone_number.message}</p>
               )}
             </div>
             <div className="space-y-2">

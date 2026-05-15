@@ -2,6 +2,8 @@ import { Briefcase, CheckCircle, ListChecks } from "@phosphor-icons/react";
 import { useAuth } from '@/features/auth';
 import { getUserDisplayName } from '@/shared/lib/utils';
 import { BentoGrid, BentoCard } from "@/shared/ui/Bento";
+import { PageHeader } from '@/components/layout/PageHeader';
+import { PageContainer } from '@/components/layout/PageContainer';
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -31,15 +33,11 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">
-          Welcome back, {getUserDisplayName(user)}
-        </h1>
-        <p className="text-muted-foreground mt-1">
-          Here's what's happening with your projects today.
-        </p>
-      </div>
+    <PageContainer maxWidth="xl">
+      <PageHeader 
+        title={`Welcome back, ${getUserDisplayName(user)}`}
+        description="Here's what's happening with your projects today."
+      />
 
       <BentoGrid>
         {stats.map((stat) => (
@@ -57,16 +55,20 @@ export default function DashboardPage() {
         ))}
 
         {/* Placeholder for Recent Activity */}
-        <BentoCard span={12} className="flex flex-col items-center justify-center text-center py-12 border-dashed">
-          <div className="w-12 h-12 bg-muted rounded-full flex items-center justify-center mb-4">
-            <ListChecks size={24} className="text-muted-foreground" />
+        <BentoCard span={12} className="py-16 border-dashed relative z-10">
+          <div className="flex items-center justify-center gap-8 max-w-xl mx-auto px-6">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center shrink-0 ring-1 ring-border/50">
+              <ListChecks size={32} className="text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="font-bold text-xl text-foreground tracking-tight">No recent activity</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                When you start working on projects, your recent activity will show up here.
+              </p>
+            </div>
           </div>
-          <h3 className="font-semibold text-lg">No recent activity</h3>
-          <p className="text-muted-foreground max-w-xs mt-1">
-            When you start working on projects, your recent activity will show up here.
-          </p>
         </BentoCard>
       </BentoGrid>
-    </div>
+    </PageContainer>
   );
 }

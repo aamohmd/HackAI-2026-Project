@@ -32,7 +32,7 @@ function BackgroundRenderer({ type }: { type: BackgroundType }) {
     <div className="fixed inset-0 pointer-events-none z-[100] overflow-hidden">
       {type === 'grid' && (
         <div 
-          className="absolute inset-0 opacity-[0.12]" 
+          className="absolute inset-0 opacity-[0.18]" 
           style={{ 
             backgroundImage: `radial-gradient(circle at 1px 1px, hsl(var(--primary)) 1px, transparent 0)`,
             backgroundSize: '32px 32px' 
@@ -41,13 +41,13 @@ function BackgroundRenderer({ type }: { type: BackgroundType }) {
       )}
       {type === 'nebula' && (
         <>
-          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full animate-pulse" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full animate-pulse [animation-delay:2s]" />
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/15 blur-[120px] rounded-full animate-pulse" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/[8%] blur-[120px] rounded-full animate-pulse [animation-delay:2s]" />
         </>
       )}
       {type === 'grain' && (
         <div 
-          className="absolute inset-0 opacity-[0.03] contrast-150 brightness-150" 
+          className="absolute inset-0 opacity-[0.045] contrast-150 brightness-150" 
           style={{ 
             backgroundImage: `url('https://www.transparenttextures.com/patterns/stardust.png')` 
           }} 

@@ -1,11 +1,16 @@
 import { useState } from 'react';
 import { SettingsTabs, AppearanceSection, GeneralSection, NotificationSection, DangerZone } from '@/features/settings';
+import { ProfileForm } from '@/features/user-profile';
+import { PageHeader } from '@/components/layout/PageHeader';
+import { PageContainer } from '@/components/layout/PageContainer';
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('general');
+  const [activeTab, setActiveTab] = useState('profile');
 
   const renderContent = () => {
     switch (activeTab) {
+      case 'profile':
+        return <ProfileForm />;
       case 'general':
         return <GeneralSection />;
       case 'notifications':
@@ -20,18 +25,18 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-foreground">Settings</h1>
-        <p className="text-muted-foreground mt-2">Manage your account preferences and application settings.</p>
-      </div>
+    <PageContainer maxWidth="xl">
+      <PageHeader 
+        title="Settings"
+        description="Manage your account preferences and application settings."
+      />
 
-      <div className="flex flex-col md:flex-row gap-8">
+      <div className="flex flex-col md:flex-row gap-12 relative z-10">
         <SettingsTabs activeTab={activeTab} onTabChange={setActiveTab} />
-        <div className="flex-1">
+        <div className="flex-1 animate-in fade-in slide-in-from-right-4 duration-500">
           {renderContent()}
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 }

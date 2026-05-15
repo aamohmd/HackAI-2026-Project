@@ -9,8 +9,8 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  login: (phone_number: string, password: string) => Promise<void>;
+  register: (phone_number: string, password: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -47,18 +47,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const login = async (email: string, password: string) => {
-    const { access_token } = await authApi.login(email, password);
+  const login = async (phone_number: string, password: string) => {
+    const { access_token } = await authApi.login(phone_number, password);
     setAccessToken(access_token);
     // Invalidate and refetch to ensure we have the latest user data
     await queryClient.invalidateQueries({ queryKey: ['profile'] });
     await queryClient.fetchQuery({ queryKey: ['profile'], queryFn: usersApi.getMe });
   };
 
-  const register = async (email: string, password: string) => {
-    await authApi.register(email, password);
+  const register = async (phone_number: string, password: string) => {
+    await authApi.register(phone_number, password);
     // After registration, log them in
-    await login(email, password);
+    await login(phone_number, password);
   };
 
   const logout = async () => {
