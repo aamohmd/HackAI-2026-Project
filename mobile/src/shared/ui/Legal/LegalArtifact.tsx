@@ -12,7 +12,7 @@ interface Props {
 
 export const LegalArtifact: React.FC<Props> = ({ citation }) => {
   return (
-    <StyledView className="bg-parchment-50 border-2 border-midnight p-3 rounded shadow-sm mb-3">
+    <StyledView className="bg-parchment-50 border-2 border-midnight/20 p-3 rounded shadow-sm mb-3">
       <StyledView className="flex-row justify-between items-center mb-2">
         <StyledText className="text-wax font-bold text-lg font-serif">
           فصل {citation.article_number}

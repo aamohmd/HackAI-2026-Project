@@ -32,4 +32,26 @@ describe('intakeApi', () => {
     );
     expect(result).toEqual(mockResponse.data);
   });
+
+  it('processText sends text and state', async () => {
+    const mockResponse = {
+      data: {
+        updated_state: { is_complete: false },
+        transcript: 'test text',
+        next_question: 'test question',
+      },
+    };
+    (api.post as jest.Mock).mockResolvedValue(mockResponse);
+
+    const text = 'test text input';
+    const state = { is_complete: false };
+
+    const result = await intakeApi.processText(text, state);
+
+    expect(api.post).toHaveBeenCalledWith('intake/text', {
+      text,
+      state_json: JSON.stringify(state),
+    });
+    expect(result).toEqual(mockResponse.data);
+  });
 });

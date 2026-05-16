@@ -27,14 +27,14 @@ export interface LandDisputeState {
   mizan_result?: MizanResult;
 }
 
-export interface VoiceResponse {
+export interface IntakeResponse {
   updated_state: LandDisputeState;
   transcript: string;
   next_question: string;
 }
 
 export const intakeApi = {
-  processVoice: async (file: { uri: string; name: string; type: string }, state: LandDisputeState): Promise<VoiceResponse> => {
+  processVoice: async (file: { uri: string; name: string; type: string }, state: LandDisputeState): Promise<IntakeResponse> => {
     const formData = new FormData();
     
     // In React Native, FormData.append for files expects this structure
@@ -55,7 +55,7 @@ export const intakeApi = {
     return response.data;
   },
 
-  processText: async (text: string, state: LandDisputeState): Promise<VoiceResponse> => {
+  processText: async (text: string, state: LandDisputeState): Promise<IntakeResponse> => {
     const response = await api.post('intake/text', {
       text,
       state_json: JSON.stringify(state)
