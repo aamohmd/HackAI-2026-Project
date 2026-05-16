@@ -40,10 +40,17 @@ class VectorStore:
             
         ids = [c.id for c in chunks]
         texts = [c.text for c in chunks]
-        metadatas = [c.to_dict() for c in chunks]
-        # remove text from metadata to avoid redundancy
-        for m in metadatas:
+        metadatas = []
+        
+        for c in chunks:
+            m = c.to_dict()
             del m["text"]
+            # Flatten the internal metadata field
+            internal_meta = m.pop("metadata")
+            for k, v in internal_meta.items():
+                if isinstance(v, (str, int, float, bool)):
+                    m[f"meta_{k}"] = v
+            metadatas.append(m)
             
         embeddings = self._embed(texts, input_type="search_document")
         

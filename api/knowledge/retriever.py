@@ -69,6 +69,13 @@ class HybridRetriever:
             if res["id"] not in seen_ids:
                 # Convert back to Chunk
                 meta = res["metadata"]
+                # Reconstruct internal metadata if any
+                internal_meta = {}
+                for k, v in list(meta.items()):
+                    if k.startswith("meta_"):
+                        internal_meta[k[5:]] = v
+                        del meta[k]
+                
                 combined_candidates.append(Chunk(
                     id=res["id"],
                     text=res["text"],
@@ -76,7 +83,7 @@ class HybridRetriever:
                     law_name=meta["law_name"],
                     law_code=meta["law_code"],
                     domain=meta["domain"],
-                    metadata=meta["metadata"]
+                    metadata=internal_meta
                 ))
                 seen_ids.add(res["id"])
                 
