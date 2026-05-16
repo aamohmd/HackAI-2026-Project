@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Audio } from 'expo-av';
 import { MotiView } from 'moti';
@@ -15,8 +15,7 @@ interface Props {
 }
 
 /**
- * HybridIntake component matching the "Dossier & Seal" aesthetic.
- * Now features a card-like container and a larger action button.
+ * HybridIntake component redesigned for consistency with LegalArtifact cards.
  */
 export const HybridIntake: React.FC<Props> = ({ onVoiceComplete, onTextSubmit }) => {
   const [textValue, setTextValue] = useState('');
@@ -64,20 +63,19 @@ export const HybridIntake: React.FC<Props> = ({ onVoiceComplete, onTextSubmit })
 
   return (
     <StyledView 
-      className="flex-row items-end p-4 bg-parchment-50 border-2 border-midnight p-4 rounded-xl shadow-sm mb-4 mx-4"
+      className="flex-row items-center p-3 bg-parchment-50 border-2 border-midnight rounded shadow-sm mb-4 mx-4"
     >
       <StyledTextInput
-        className="flex-1 min-h-[48px] max-h-[120px] p-3 mr-3 bg-white/50 rounded-lg border border-midnight/5 text-midnight text-base font-serif"
+        className="flex-1 min-h-[48px] max-h-[120px] text-midnight text-base font-serif border-b-2 border-midnight/10 pb-1"
         placeholder="Describe your case..."
         placeholderTextColor="#1E293B60"
         multiline
         value={textValue}
         onChangeText={setTextValue}
         testID="text-input"
-        textAlignVertical="center"
       />
       
-      <StyledView className="items-center justify-center w-14 h-14">
+      <StyledView className="items-center justify-center w-14 h-14 ml-3">
         {isRecording && (
           <MotiView
             from={{ scale: 1, opacity: 0.6 }}
