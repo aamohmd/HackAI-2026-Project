@@ -41,7 +41,7 @@ export default function MobileHubScreen() {
         <StyledView className="mb-10 items-center">
           <StyledView className="w-16 h-1 bg-wax mb-4 rounded-full" />
           <StyledText className="text-4xl font-bold text-midnight uppercase tracking-[4] font-serif text-center">
-            Sidi El Qadi
+            Mizan
           </StyledText>
           <StyledText className="text-midnight/50 italic mt-2 font-serif text-lg text-center">
             "Speak your truth. We will find the law."

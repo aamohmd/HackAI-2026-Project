@@ -52,7 +52,7 @@ export default function LoginScreen() {
                 <Gavel size={40} color="white" weight="fill" />
               </StyledView>
               <StyledText className="text-3xl font-bold text-midnight uppercase tracking-[4] font-serif text-center">
-                Sidi El Qadi
+                Mizan
               </StyledText>
               <StyledText className="text-midnight/40 italic mt-2 font-serif text-center">
                 Access your dossiers
