@@ -54,4 +54,12 @@ export const intakeApi = {
 
     return response.data;
   },
+
+  processText: async (text: string, state: LandDisputeState): Promise<VoiceResponse> => {
+    const response = await api.post('intake/text', {
+      text,
+      state_json: JSON.stringify(state)
+    });
+    return response.data;
+  },
 };
