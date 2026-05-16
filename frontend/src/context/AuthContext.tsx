@@ -10,7 +10,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (phone_number: string, password: string) => Promise<void>;
-  register: (phone_number: string, password: string) => Promise<void>;
+  register: (phone_number: string, password: string, verification_code: string) => Promise<void>;
+  sendOtp: (phone_number: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -55,10 +56,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await queryClient.fetchQuery({ queryKey: ['profile'], queryFn: usersApi.getMe });
   };
 
-  const register = async (phone_number: string, password: string) => {
-    await authApi.register(phone_number, password);
+  const register = async (phone_number: string, password: string, verification_code: string) => {
+    await authApi.register(phone_number, password, verification_code);
     // After registration, log them in
     await login(phone_number, password);
+  };
+
+  const sendOtp = async (phone_number: string) => {
+    await authApi.sendOtp(phone_number);
   };
 
   const logout = async () => {
@@ -84,6 +89,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isLoading,
         login,
         register,
+        sendOtp,
         logout,
       }}
     >

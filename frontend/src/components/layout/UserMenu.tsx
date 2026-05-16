@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { User, SignOut, UserCircle, CaretDown } from "@phosphor-icons/react";
-import { useAuth } from '@/features/auth';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { getUserDisplayName } from '@/shared/lib/utils';
 import { cn } from '@/shared/lib/utils';
 

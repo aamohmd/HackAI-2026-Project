@@ -1,5 +1,5 @@
 import { Briefcase, CheckCircle, ListChecks } from "@phosphor-icons/react";
-import { useAuth } from '@/features/auth';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import { getUserDisplayName } from '@/shared/lib/utils';
 import { BentoGrid, BentoCard } from "@/shared/ui/Bento";
 import { PageHeader } from '@/components/layout/PageHeader';

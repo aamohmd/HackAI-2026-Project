@@ -15,8 +15,13 @@ export interface Token {
 }
 
 export const authApi = {
-  register: async (phone_number: string, password: string): Promise<User> => {
-    const { data } = await api.post<User>('/auth/register', { phone_number, password });
+  sendOtp: async (phone_number: string): Promise<{ detail: string }> => {
+    const { data } = await api.post<{ detail: string }>(`/auth/send-otp?phone_number=${encodeURIComponent(phone_number)}`);
+    return data;
+  },
+
+  register: async (phone_number: string, password: string, verification_code: string): Promise<User> => {
+    const { data } = await api.post<User>(`/auth/register?verification_code=${verification_code}`, { phone_number, password });
     return data;
   },
 

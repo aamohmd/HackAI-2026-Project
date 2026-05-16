@@ -46,6 +46,19 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplet
     }
   };
 
+  const handleStart = (e: React.MouseEvent | React.TouchEvent) => {
+    // Prevent default to stop browser from showing context menu or selecting text
+    if (e.type === 'touchstart') {
+      // We don't preventDefault here because it might block the event from firing on some browsers
+      // Instead we use onContextMenu and CSS select-none
+    }
+    startRecording();
+  };
+
+  const handleEnd = (e: React.MouseEvent | React.TouchEvent) => {
+    stopRecording();
+  };
+
   return (
     <div className="flex flex-col items-center justify-center gap-6">
       <AnimatePresence>
@@ -65,13 +78,15 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplet
 
       <Button
         size="lg"
-        className={`w-20 h-20 rounded-full shadow-xl transition-all ${
+        className={`w-20 h-20 rounded-full shadow-xl transition-all select-none touch-none ${
           isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-sky-600 hover:bg-sky-700'
         }`}
-        onMouseDown={startRecording}
-        onMouseUp={stopRecording}
-        onTouchStart={startRecording}
-        onTouchEnd={stopRecording}
+        onMouseDown={handleStart}
+        onMouseUp={handleEnd}
+        onMouseLeave={handleEnd}
+        onTouchStart={handleStart}
+        onTouchEnd={handleEnd}
+        onContextMenu={(e) => e.preventDefault()}
         disabled={isProcessing}
       >
         {isProcessing ? (
@@ -83,7 +98,7 @@ export const VoiceRecorder: React.FC<VoiceRecorderProps> = ({ onRecordingComplet
         )}
       </Button>
       
-      <p className="text-mist-600 font-medium">
+      <p className="text-mist-600 font-medium select-none">
         {isProcessing ? "Processing..." : isRecording ? "Release to Send" : "Hold to Speak (Darija)"}
       </p>
     </div>
