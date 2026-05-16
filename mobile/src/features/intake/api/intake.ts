@@ -1,5 +1,20 @@
 import api from '@/shared/api/client';
 
+export interface Citation {
+  article_number: string;
+  law_name: string;
+  law_code: string;
+  claim_supported: string;
+}
+
+export interface MizanResult {
+  answer_darija: string;
+  citations: Citation[];
+  confidence: number;
+  recommend_lawyer: boolean;
+  answer_register: 'simple' | 'standard' | 'technical';
+}
+
 export interface LandDisputeState {
   claimant_name?: string;
   opponent_name?: string;
@@ -8,6 +23,8 @@ export interface LandDisputeState {
   proof_type?: string;
   description?: string;
   is_complete: boolean;
+  interim_citations?: Citation[];
+  mizan_result?: MizanResult;
 }
 
 export interface VoiceResponse {
