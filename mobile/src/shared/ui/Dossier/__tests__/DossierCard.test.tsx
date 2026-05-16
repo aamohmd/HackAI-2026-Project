@@ -19,6 +19,6 @@ describe('DossierCard', () => {
     const { getByText } = render(
       <DossierCard name="TEST_DOSSIER" icon={<MockIcon />} completed={true} />
     );
-    expect(getByText('MOTABAQ')).toBeTruthy();
+    expect(getByText('Motabaq')).toBeTruthy();
   });
 });

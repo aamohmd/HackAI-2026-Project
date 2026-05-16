@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { ScrollView, View, Text, ActivityIndicator } from 'react-native';
 import { styled } from 'nativewind';
-import { User, MapTrifold, Calendar, Scroll, SealCheck } from 'phosphor-react-native';
-import { DossierCard } from '@/shared/ui/Dossier';
+import { SealCheck, Gavel } from 'phosphor-react-native';
+import { LegalResponse, TripleArtifactHUD } from '@/shared/ui/Legal';
 import { NativeVoiceRecorder } from '@/features/intake/components/NativeVoiceRecorder';
 import { intakeApi, LandDisputeState } from '@/features/intake/api/intake';
 
@@ -48,43 +48,26 @@ export default function MobileHubScreen() {
           </StyledText>
         </StyledView>
 
-        <StyledView className="flex-row flex-wrap justify-between">
-          <View style={{ width: '48%' }}>
-            <DossierCard
-              name="Opponent"
-              icon={<User size={22} color="#9A3412" weight="duotone" />}
-              description={caseState.opponent_name}
-              completed={!!caseState.opponent_name}
-            />
-          </View>
-          <View style={{ width: '48%' }}>
-            <DossierCard
-              name="Location"
-              icon={<MapTrifold size={22} color="#9A3412" weight="duotone" />}
-              description={caseState.location}
-              completed={!!caseState.location}
-            />
-          </View>
-          <View style={{ width: '48%' }}>
-            <DossierCard
-              name="Date"
-              icon={<Calendar size={22} color="#9A3412" weight="duotone" />}
-              description={caseState.date_of_incident}
-              completed={!!caseState.date_of_incident}
-            />
-          </View>
-          <View style={{ width: '48%' }}>
-            <DossierCard
-              name="Proof"
-              icon={<Scroll size={22} color="#9A3412" weight="duotone" />}
-              description={caseState.proof_type}
-              completed={!!caseState.proof_type}
-            />
-          </View>
-        </StyledView>
+        {/* Triple Artifact HUD (Replaces Fact Dossier) */}
+        {!caseState.mizan_result && (
+          <TripleArtifactHUD citations={caseState.interim_citations || []} />
+        )}
 
-        {caseState.description && (
-          <StyledView className="bg-white/40 p-6 border-l-4 border-wax shadow-sm my-8">
+        {/* Mizan Legal Response Section */}
+        {caseState.mizan_result && (
+          <StyledView className="mb-10">
+            <LegalResponse
+              answer={caseState.mizan_result.answer_darija}
+              citations={caseState.mizan_result.citations}
+              confidence={caseState.mizan_result.confidence}
+              recommendLawyer={caseState.mizan_result.recommend_lawyer}
+              register={caseState.mizan_result.answer_register}
+            />
+          </StyledView>
+        )}
+
+        {caseState.description && !caseState.mizan_result && (
+          <StyledView className="bg-white/40 p-6 border-l-4 border-wax shadow-sm mb-8">
             <StyledText className="text-[11px] font-bold text-midnight/40 uppercase tracking-[2] mb-4 font-sans">
               The Testimony
             </StyledText>

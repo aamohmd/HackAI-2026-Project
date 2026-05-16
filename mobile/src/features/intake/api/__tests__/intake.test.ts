@@ -24,7 +24,7 @@ describe('intakeApi', () => {
     const result = await intakeApi.processVoice(file, state);
 
     expect(api.post).toHaveBeenCalledWith(
-      '/intake/voice',
+      'intake/voice',
       expect.any(FormData),
       expect.objectContaining({
         headers: { 'Content-Type': 'multipart/form-data' },
