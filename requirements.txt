@@ -9,3 +9,8 @@ argon2-cffi
 slowapi
 groq
 twilio
+chromadb
+rank-bm25
+cohere
+rapidfuzz
+google-generativeai
