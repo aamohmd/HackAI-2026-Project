@@ -9,19 +9,27 @@ The frontend is organized into layers to ensure scalability and isolation.
 - **`src/pages`**: Route entry points that compose Features and Widgets inside Layouts.
 - **`src/components/layout`**: Global layout structures (Header, Sidebar).
 
-## 2. Visual Standards: Mist & Sky Theme
+## 2. Visual Standards: Dossier & Seal Theme
 
-We use a high-contrast "AI Workbench" aesthetic inspired by LangChain.
+We use an "Official Legal" aesthetic inspired by classic Moroccan administrative dossiers.
 
-- **Theme**: Cool grays ("Mist") with vibrant blue accents ("Sky").
-- **Typography**: Figtree (Sans-Serif) for all text.
-- **Icons**: Phosphor Icons (Regular weight for UI, Bold for active states).
-- **Layout**: Use the **Bento Box** grid system for data-heavy pages.
-    - Components: `shared/ui/Bento/BentoGrid` and `shared/ui/Bento/BentoCard`.
-    - Features: Subtle 1px borders, 0.5rem radius, and radial glow hover effects.
+- **Theme**: Parchment backgrounds (`#FDFBF7`), Midnight Navy text (`#1E293B`), and Wax Red accents (`#9A3412`).
+- **Typography**: 
+    - **Headings/Serif**: Crimson Text (for an authoritative, legal look).
+    - **Body/Sans**: Figtree (for modern legibility).
+- **Icons**: Phosphor Icons (Regular weight). Prefer `Gavel`, `Scroll`, `User`, `MapTrifold`.
+- **Layout**: Use the **Dossier System**.
+    - Components: `shared/ui/Dossier/DossierCard` and `shared/ui/Dossier/RubberStamp`.
+    - Style: 2px borders, 0.25rem radius, and "Motabaq" (Verified) rubber stamps for completed sections.
 
-## 3. Development Workflow
+## 4. Mobile Application (Expo)
 
-- **Type Safety**: Verbatim module syntax is enabled. Use `import type` for type-only imports.
-- **Performance**: Follow Vercel React Best Practices. Avoid waterfalls; use parallel fetching where possible.
-- **Testing**: Follow TDD for new features. Ensure behavioral correctness before implementation.
+The mobile app is located in the `mobile/` directory and mirrors the "Sidi El Qadi" experience.
+
+- **Stack**: Expo, React Native, NativeWind (Tailwind for Native), Expo SecureStore (Auth).
+- **Voice Intake**: Uses `expo-av` for robust native recording.
+- **Styling**: Adheres to the same "Dossier & Seal" visual standards as the web.
+- **Getting Started**:
+    1. `cd mobile`
+    2. `npm install`
+    3. `npx expo start`
