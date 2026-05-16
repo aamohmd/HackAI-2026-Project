@@ -148,7 +148,14 @@ def register(request: Request, user: UserCreate, verification_code: str, db: Ses
 @router.post("/login", response_model=Token)
 @limiter.limit("5/minute")
 def login(request: Request, response: Response, form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.phone_number == form_data.username).first()
+    # 0. Sanitize input phone (form_data.username)
+    clean_phone = form_data.username.replace(" ", "").replace("-", "")
+    if clean_phone.startswith("0") and len(clean_phone) == 10:
+        clean_phone = "+212" + clean_phone[1:]
+    if not clean_phone.startswith("+"):
+        clean_phone = "+" + clean_phone
+
+    user = db.query(User).filter(User.phone_number == clean_phone).first()
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
