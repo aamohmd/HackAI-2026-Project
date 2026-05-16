@@ -40,21 +40,5 @@ services:
     volumes:
       - .:/app
 
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
-    container_name: hackathon_frontend
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_TARGET=http://api:8000
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    depends_on:
-      api:
-        condition: service_started
-
 volumes:
   postgres_data:

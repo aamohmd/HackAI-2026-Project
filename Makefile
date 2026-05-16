@@ -10,10 +10,12 @@ help:
 	@echo "  make logs            - Follow the logs of the containers"
 
 dev:
-	$(COMPOSE) up --build
+	@echo "Starting Backend (Docker) and Mobile (Expo)..."
+	docker compose up -d api db
+	cd mobile && npx expo start
 
 prod:
-	docker compose -f docker-compose.yaml -f docker-compose.prod.yaml up --build -d
+	$(COMPOSE) up --build -d api db
 
 down:
 	$(COMPOSE) down
@@ -22,8 +24,6 @@ clean:
 	@echo "Cleaning up Docker resources..."
 	$(COMPOSE) down -v --rmi all
 	@echo "Cleaning up local artifacts..."
-	rm -rf frontend/node_modules
-	rm -rf frontend/dist
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	@echo "Cleanup complete."
 

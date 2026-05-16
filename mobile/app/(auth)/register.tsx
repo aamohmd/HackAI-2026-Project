@@ -110,7 +110,7 @@ export default function RegisterScreen() {
               </StyledView>
 
               {otpSent && (
-                <>
+                <View>
                   <StyledView className="mt-4">
                     <StyledText className="text-[10px] font-bold text-midnight/40 uppercase tracking-[2] mb-2 ml-1 font-sans">
                       Verification Code (OTP)
@@ -141,7 +141,7 @@ export default function RegisterScreen() {
                       className="bg-white/50 border-2 border-midnight/10 p-4 rounded-lg text-midnight font-serif text-lg"
                     />
                   </StyledView>
-                </>
+                </View>
               )}
 
               {error && (

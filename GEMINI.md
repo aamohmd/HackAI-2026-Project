@@ -1,13 +1,18 @@
-# Project Guidelines: HackAI 2026
+# Project Guidelines: HackAI 2026 (Mobile-First)
 
-## 1. Architecture: Feature-Sliced Design (FSD)
+## 1. Architecture: Mobile-Native & API
 
-The frontend is organized into layers to ensure scalability and isolation.
+The project is focused on a mobile-native experience via **Expo** and a robust **FastAPI** backend.
 
-- **`src/shared`**: Foundation building blocks (UI Kit, API client, utils). No business logic.
-- **`src/features`**: Domain-specific modules (e.g., `auth`, `user-profile`, `settings`). Features must expose a public API via an `index.ts` file. Cross-feature imports are strictly forbidden.
-- **`src/pages`**: Route entry points that compose Features and Widgets inside Layouts.
-- **`src/components/layout`**: Global layout structures (Header, Sidebar).
+### Backend (Python/FastAPI)
+- **CORS**: Configured to allow all origins (`*`) to support diverse mobile networking environments.
+- **AI Stack**: Groq (Whisper for voice, Llama 3.3 for logic).
+- **Auth**: Phone-based OTP.
+
+### Mobile (Expo)
+- **Location**: `mobile/` directory.
+- **Stack**: Expo, React Native, NativeWind, Expo SecureStore.
+- **Voice Intake**: Native `expo-av` recording.
 
 ## 2. Visual Standards: Dossier & Seal Theme
 
@@ -17,19 +22,16 @@ We use an "Official Legal" aesthetic inspired by classic Moroccan administrative
 - **Typography**: 
     - **Headings/Serif**: Crimson Text (for an authoritative, legal look).
     - **Body/Sans**: Figtree (for modern legibility).
-- **Icons**: Phosphor Icons (Regular weight). Prefer `Gavel`, `Scroll`, `User`, `MapTrifold`.
-- **Layout**: Use the **Dossier System**.
-    - Components: `shared/ui/Dossier/DossierCard` and `shared/ui/Dossier/RubberStamp`.
+- **Icons**: Phosphor Icons (Regular weight).
+- **Layout**: The **Dossier System**.
     - Style: 2px borders, 0.25rem radius, and "Motabaq" (Verified) rubber stamps for completed sections.
 
-## 4. Mobile Application (Expo)
+## 3. Getting Started
 
-The mobile app is located in the `mobile/` directory and mirrors the "Sidi El Qadi" experience.
-
-- **Stack**: Expo, React Native, NativeWind (Tailwind for Native), Expo SecureStore (Auth).
-- **Voice Intake**: Uses `expo-av` for robust native recording.
-- **Styling**: Adheres to the same "Dossier & Seal" visual standards as the web.
-- **Getting Started**:
-    1. `cd mobile`
-    2. `npm install`
-    3. `npx expo start`
+1. **Start Backend**: `docker compose up -d db api`
+2. **Start Mobile**:
+    ```bash
+    cd mobile
+    npm install
+    npx expo start
+    ```

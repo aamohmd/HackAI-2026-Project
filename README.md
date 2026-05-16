@@ -1,24 +1,20 @@
-# HackAI-2026 Project
+# HackAI-2026: Sidi El Qadi
 
-This is the boilerplate project for the HackAI 2026 Hackathon. It features a FastAPI backend, a React (Vite) frontend, and a PostgreSQL database, all containerized with Docker.
+A voice-first AI legal assistant for rural Morocco, focused on mobile-native accessibility.
 
 ## Project Structure
 
 ```text
 HackAI-2026-Project/
-├── api/                  # FastAPI Backend
+├── api/                  # FastAPI Backend (Groq, Llama, Whisper)
 │   ├── routes/           # API Endpoints
-│   ├── database.py       # SQLAlchemy setup
-│   ├── main.py           # App entry point
-│   ├── models.py         # DB Models
-│   └── schemas.py        # Pydantic Schemas
-├── frontend/             # React (Vite) Frontend
-│   ├── src/              # Source code (TypeScript)
-│   ├── Dockerfile.dev    # Dev-specific Dockerfile
-│   └── vite.config.ts    # Vite config with backend proxy
+│   ├── services/         # AI Agent Logic
+│   └── tests/            # Pytest suite
+├── mobile/               # Expo (React Native) App
+│   ├── src/              # Source code (TypeScript + NativeWind)
+│   └── app/              # Expo Router pages
 ├── conductor/            # Project planning & standards
-├── docker-compose.yaml   # Orchestration for API, DB, and Frontend
-├── Makefile              # Shortcut commands for development
+├── docker-compose.yaml   # Orchestration for API & DB
 └── requirements.txt      # Python dependencies
 ```
 
@@ -26,40 +22,27 @@ HackAI-2026-Project/
 
 ### 1. Prerequisites
 - Docker & Docker Compose
-- Python 3.10+
-- Node.js 20+
+- Node.js 20+ (for Mobile)
+- Expo Go app on your phone
 
 ### 2. Setup
-Copy the example environment file and fill in your local values:
 ```bash
 cp .env.example .env
+# Fill in GROQ_API_KEY
 ```
 
-### 3. Development Workflow (Recommended)
+### 3. Development Workflow
 
-For the best developer experience (Fast HMR), run the database in Docker but run the applications natively:
-
-1.  **Start the DB:** `make up-db`
-2.  **Install Deps:** `make install`
-3.  **Run Backend:** `make dev-backend`
-4.  **Run Frontend:** `make dev-frontend`
-
-The frontend will be at `http://localhost:5173` and the backend at `http://localhost:8000`.
-
-### 4. Full Docker Execution (Production-like)
-
-To run everything in isolated containers:
-```bash
-make up
-```
+1.  **Start the Services:** `docker compose up -d`
+2.  **Start Mobile App:**
+    ```bash
+    cd mobile
+    npm install
+    npx expo start
+    ```
 
 ## Git Standards
-
-We follow a strict branching and commit strategy. See [conductor/git-standards.md](conductor/git-standards.md) for details.
-
-- **Main Branch:** `main`
-- **Development Branch:** `dev`
-- **Feature Branches:** `feat/feature-name`
+See [conductor/git-standards.md](conductor/git-standards.md).
 
 ## License
 MIT
