@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { VoiceRecorder } from '@/features/intake/components/VoiceRecorder';
 import { BentoGrid, BentoCard } from '@/shared/ui/Bento';
 import { MapPin, User, Calendar, FileText, CheckCircle2 } from 'lucide-react';
-import axios from 'axios';
+import api from '@/shared/api/client';
 
 interface CaseState {
   claimant_name?: string;
@@ -26,7 +26,7 @@ export const MobileHub = () => {
     formData.append('state_json', JSON.stringify(caseState));
 
     try {
-      const response = await axios.post('/api/intake/voice', formData, {
+      const response = await api.post('/intake/voice', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
