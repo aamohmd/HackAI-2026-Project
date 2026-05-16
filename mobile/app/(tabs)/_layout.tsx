@@ -14,10 +14,19 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#9A3412',
         tabBarInactiveTintColor: '#1E293B',
         headerShown: false,
+        tabBarHideOnKeyboard: true,
         tabBarStyle: {
           backgroundColor: '#F8F4E9',
           borderTopColor: 'rgba(30, 41, 59, 0.1)',
-        }
+          borderTopWidth: 2,
+          elevation: 0,
+        },
+        tabBarLabelStyle: {
+          fontFamily: 'Figtree',
+          fontSize: 10,
+          letterSpacing: 1,
+          textTransform: 'uppercase',
+        },
       }}>
       <Tabs.Screen
         name="index"

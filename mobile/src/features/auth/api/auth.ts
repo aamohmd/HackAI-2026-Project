@@ -14,9 +14,15 @@ export interface Token {
   token_type: string;
 }
 
+export interface OtpResponse {
+  detail: string;
+  otp_code: string;
+  delivery: 'whatsapp' | 'simulated' | 'failed';
+}
+
 export const authApi = {
-  sendOtp: async (phone_number: string): Promise<{ detail: string }> => {
-    const { data } = await api.post<{ detail: string }>(`auth/send-otp?phone_number=${encodeURIComponent(phone_number)}`);
+  sendOtp: async (phone_number: string): Promise<OtpResponse> => {
+    const { data } = await api.post<OtpResponse>(`auth/send-otp?phone_number=${encodeURIComponent(phone_number)}`);
     return data;
   },
 
@@ -26,14 +32,14 @@ export const authApi = {
   },
 
   login: async (phone_number: string, password: string): Promise<Token> => {
-    // FastAPI's OAuth2PasswordRequestForm expects form data
-    const formData = new FormData();
-    formData.append('username', phone_number);
-    formData.append('password', password);
+    // FastAPI's OAuth2PasswordRequestForm optimally expects url-encoded form data
+    const params = new URLSearchParams();
+    params.append('username', phone_number);
+    params.append('password', password);
 
-    const { data } = await api.post<Token>('auth/login', formData, {
+    const { data } = await api.post<Token>('auth/login', params.toString(), {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
     });
     return data;

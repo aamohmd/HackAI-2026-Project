@@ -45,11 +45,7 @@ export const usersApi = {
   // Note: uploadAvatar might need adjustment for mobile file picking, 
   // but the API call itself remains the same.
   uploadAvatar: async (formData: FormData): Promise<User> => {
-    const { data } = await api.post<User>('users/me/avatar', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+    const { data } = await api.post<User>('users/me/avatar', formData);
     return data;
   },
 };

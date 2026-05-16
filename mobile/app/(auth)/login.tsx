@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
 import { Link, useRouter } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
@@ -40,12 +41,13 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-parchment-100"
-    >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <StyledView className="flex-1 px-8 pt-20 pb-10 justify-between">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F4E9' }}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <StyledView className="flex-1 px-6 pt-8 pb-8 justify-between">
           <StyledView>
             <StyledView className="items-center mb-12">
               <StyledView className="w-20 h-20 rounded-full bg-wax items-center justify-center shadow-lg mb-6">
@@ -127,7 +129,8 @@ export default function LoginScreen() {
             </StyledView>
           </StyledView>
         </StyledView>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

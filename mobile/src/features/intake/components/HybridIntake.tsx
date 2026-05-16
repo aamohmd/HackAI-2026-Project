@@ -63,7 +63,7 @@ export const HybridIntake: React.FC<Props> = ({ onVoiceComplete, onTextSubmit })
 
   return (
     <StyledView 
-      className="flex-row items-center p-3 bg-parchment-50 border-2 border-midnight/20 rounded shadow-sm mb-4 mx-4"
+      className="flex-row items-center px-5 py-3 bg-parchment-100"
     >
       <StyledTextInput
         className="flex-1 min-h-[48px] max-h-[120px] text-midnight text-base font-serif border-b-2 border-midnight/10 pb-1"

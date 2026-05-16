@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, type ReactNode } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { authApi, type User } from '@/features/auth/api/auth';
+import { authApi, type User, type OtpResponse } from '@/features/auth/api/auth';
 import { usersApi } from '@/features/user-profile/api/users';
 import { setAccessToken, getAccessToken } from '@/shared/api/client';
 
@@ -10,7 +10,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (phone_number: string, password: string) => Promise<void>;
   register: (phone_number: string, password: string, verification_code: string) => Promise<void>;
-  sendOtp: (phone_number: string) => Promise<void>;
+  sendOtp: (phone_number: string) => Promise<OtpResponse>;
   logout: () => void;
 }
 
@@ -70,8 +70,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await login(phone_number, password);
   };
 
-  const sendOtp = async (phone_number: string) => {
-    await authApi.sendOtp(phone_number);
+  const sendOtp = async (phone_number: string): Promise<OtpResponse> => {
+    return await authApi.sendOtp(phone_number);
   };
 
   const logout = async () => {

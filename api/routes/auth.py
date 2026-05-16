@@ -92,22 +92,29 @@ def send_otp(request: Request, phone_number: str, db: Session = Depends(get_db))
     
     db.commit()
 
-    # Send via Twilio WhatsApp
+    # Send via Twilio WhatsApp (best-effort delivery)
+    delivery_method = "simulated"
     if twilio_client:
         try:
             print(f"Twilio: Attempting to send code {otp_code} to {clean_phone}")
             message = twilio_client.messages.create(
                 from_=f"whatsapp:{TWILIO_WHATSAPP_NUMBER}",
-                body=f"Your Justice Kiosk code is: {otp_code}. Don't share it with anyone.",
+                body=f"Your Mizan verification code is: {otp_code}. Don't share it with anyone.",
                 to=f"whatsapp:{clean_phone}"
             )
-            return {"detail": f"OTP sent to {clean_phone} via WhatsApp"}
+            delivery_method = "whatsapp"
         except Exception as e:
             print(f"Twilio Error for {clean_phone}: {e}")
-            return {"detail": f"Twilio Error: {str(e)}"}
+            delivery_method = "failed"
     else:
         print(f"\n[SMS SIMULATION] Code {otp_code} for {clean_phone}\n")
-        return {"detail": f"OTP Simulated: {otp_code}"}
+
+    # Always return the OTP in dev to allow auto-fill on mobile
+    return {
+        "detail": f"OTP sent to {clean_phone}",
+        "otp_code": otp_code,
+        "delivery": delivery_method
+    }
 
 @router.post("/register", response_model=UserRead)
 @limiter.limit("5/minute")

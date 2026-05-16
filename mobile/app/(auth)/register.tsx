@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
 import { Link, useRouter } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
@@ -33,8 +34,12 @@ export default function RegisterScreen() {
     setError(null);
     setIsSendingOtp(true);
     try {
-      await auth.sendOtp(phoneNumber);
+      const response = await auth.sendOtp(phoneNumber);
       setOtpSent(true);
+      // Auto-fill the OTP from the API response for seamless UX
+      if (response.otp_code) {
+        setOtp(response.otp_code);
+      }
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to send OTP. Try again.');
     } finally {
@@ -61,12 +66,13 @@ export default function RegisterScreen() {
   };
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-parchment-100"
-    >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <StyledView className="flex-1 px-8 pt-16 pb-10 justify-between">
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8F4E9' }}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+          <StyledView className="flex-1 px-6 pt-6 pb-8 justify-between">
           <StyledView>
             <StyledView className="items-center mb-10">
               <StyledView className="w-16 h-1 bg-wax mb-8 rounded-full" />
@@ -191,7 +197,8 @@ export default function RegisterScreen() {
             </StyledView>
           </StyledView>
         </StyledView>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
