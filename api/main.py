@@ -6,8 +6,9 @@ import os
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from .database import engine, Base
-from .routes import auth, users, intake
+from .routes import auth, users, intake, dossiers
 from . import models
+
 from .limiter import limiter
 from .utils import ensure_upload_dir, UPLOAD_DIR
 
@@ -42,5 +43,8 @@ async def health_check():
     return {"status": "ok"}
 
 app.include_router(auth.router)
+
 app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(intake.router, tags=["intake"])
+app.include_router(dossiers.router, tags=["dossiers"])
+

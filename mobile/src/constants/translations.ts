@@ -14,6 +14,10 @@ export const translations = {
     gateway_title: "Select Language",
     gateway_darija: "الدارجة",
     gateway_english: "English",
+    gateway_darija_subtitle: "Mghribiya",
+    gateway_english_subtitle: "Universal",
+    gateway_darija_a11y: "Select Darija language",
+    gateway_english_a11y: "Select English language",
   },
   ar: {
     welcome_title: "ميزان",
@@ -30,6 +34,10 @@ export const translations = {
     gateway_title: "اختر اللغة",
     gateway_darija: "الدارجة",
     gateway_english: "English",
+    gateway_darija_subtitle: "مغربية",
+    gateway_english_subtitle: "Universal",
+    gateway_darija_a11y: "اختر اللغة الدارجة",
+    gateway_english_a11y: "Select English language",
   }
 };
 

@@ -51,3 +51,10 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     phone_number: Optional[str] = None
+
+class IntakeTextRequest(BaseModel):
+    text: str
+    state_json: str
+    dossier_id: Optional[str] = None
+
+

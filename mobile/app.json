@@ -28,8 +28,16 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "description": "Rural Rights Advocate - Mizan",
+      "themeColor": "#9A3412",
+      "backgroundColor": "#FDFBF7",
+      "display": "standalone",
+      "lang": "ar-MA",
+      "name": "Mizan - Rural Rights",
+      "shortName": "Mizan"
     },
+
     "plugins": [
       "expo-router"
     ],

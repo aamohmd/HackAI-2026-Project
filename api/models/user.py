@@ -16,6 +16,8 @@ class User(Base):
     avatar_url = Column(String, nullable=True)
 
     preferences = relationship("UserPreference", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    dossiers = relationship("Dossier", back_populates="user", cascade="all, delete-orphan")
+
 
 class VerificationCode(Base):
     __tablename__ = "verification_codes"

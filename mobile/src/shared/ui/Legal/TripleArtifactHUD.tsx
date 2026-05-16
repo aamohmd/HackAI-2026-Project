@@ -12,9 +12,10 @@ interface Props {
 }
 
 export const TripleArtifactHUD: React.FC<Props> = ({ citations }) => {
-  // Always display exactly 3 slots. Take up to the first 3 citations.
+  // Take up to the first 3 citations.
   const displayCitations = citations.slice(0, 3);
-  const emptySlotsCount = 3 - displayCitations.length;
+  // Only show 1 empty placeholder if there are no citations. Otherwise, just show the populated ones.
+  const emptySlotsCount = displayCitations.length === 0 ? 1 : 0;
 
   return (
     <StyledView className="w-full mb-8">

@@ -16,10 +16,12 @@ export default function TabLayout() {
         headerShown: false,
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
-          backgroundColor: '#F8F4E9',
+          backgroundColor: '#FDFBF7',
           borderTopColor: 'rgba(30, 41, 59, 0.1)',
           borderTopWidth: 2,
           elevation: 0,
+          height: 64,
+          paddingBottom: 8,
         },
         tabBarLabelStyle: {
           fontFamily: 'Figtree',
@@ -35,13 +37,15 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <House size={24} color={color} weight="duotone" />,
         }}
       />
+
       <Tabs.Screen
-        name="two"
+        name="settings"
         options={{
-          title: 'Archive',
+          title: 'Settings',
           tabBarIcon: ({ color }) => <Gear size={24} color={color} weight="duotone" />,
         }}
       />
     </Tabs>
   );
 }
+

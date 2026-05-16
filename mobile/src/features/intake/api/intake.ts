@@ -17,6 +17,7 @@ export interface MizanResult {
 }
 
 export interface LandDisputeState {
+  dossier_id?: string;
   claimant_name?: string;
   opponent_name?: string;
   location?: string;
@@ -32,13 +33,13 @@ export interface IntakeResponse {
   updated_state: LandDisputeState;
   transcript: string;
   next_question: string;
+  dossier_id: string;
 }
 
 export const intakeApi = {
   processVoice: async (file: { uri: string; name: string; type: string }, state: LandDisputeState): Promise<IntakeResponse> => {
     const formData = new FormData();
     
-    // In React Native, FormData.append for files expects this structure
     formData.append('file', {
       uri: Platform.OS === 'android' && !file.uri.startsWith('file://') ? `file://${file.uri}` : file.uri,
       name: file.name,
@@ -46,6 +47,9 @@ export const intakeApi = {
     } as any);
     
     formData.append('state_json', JSON.stringify(state));
+    if (state.dossier_id) {
+      formData.append('dossier_id', state.dossier_id);
+    }
 
     const token = await getAccessToken();
     const baseUrl = api.defaults.baseURL;
@@ -54,7 +58,6 @@ export const intakeApi = {
       method: 'POST',
       body: formData,
       headers: {
-        // DO NOT set Content-Type manually with fetch, it adds the boundary automatically
         'Authorization': `Bearer ${token}`,
       },
     });
@@ -70,8 +73,10 @@ export const intakeApi = {
   processText: async (text: string, state: LandDisputeState): Promise<IntakeResponse> => {
     const response = await api.post('intake/text', {
       text,
-      state_json: JSON.stringify(state)
+      state_json: JSON.stringify(state),
+      dossier_id: state.dossier_id
     });
     return response.data;
   },
 };
+

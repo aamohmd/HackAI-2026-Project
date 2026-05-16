@@ -95,8 +95,22 @@ export default function LoginScreen() {
                   {error}
                 </StyledText>
               )}
+
+              <StyledView className="flex-row justify-between mt-4 px-1">
+                <StyledTouchableOpacity>
+                  <StyledText className="text-midnight/40 text-[10px] font-bold uppercase tracking-[1] font-sans">
+                    Forgot Password?
+                  </StyledText>
+                </StyledTouchableOpacity>
+                <StyledTouchableOpacity>
+                  <StyledText className="text-midnight/40 text-[10px] font-bold uppercase tracking-[1] font-sans">
+                    System Help
+                  </StyledText>
+                </StyledTouchableOpacity>
+              </StyledView>
             </StyledView>
           </StyledView>
+
 
           <StyledView className="mt-12">
             <StyledTouchableOpacity

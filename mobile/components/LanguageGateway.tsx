@@ -24,7 +24,7 @@ export const LanguageGateway = () => {
           onPress={() => setLanguage('ar')}
           activeOpacity={0.7}
           className="items-center"
-          accessibilityLabel="Select Darija language"
+          accessibilityLabel={t('gateway_darija_a11y')}
           accessibilityRole="button"
         >
           <StyledMotiView
@@ -39,7 +39,7 @@ export const LanguageGateway = () => {
             </StyledText>
           </StyledMotiView>
           <StyledText className="mt-4 text-midnight/40 font-sans text-xs uppercase tracking-[2]">
-            Mghribiya
+            {t('gateway_darija_subtitle')}
           </StyledText>
         </StyledTouchableOpacity>
 
@@ -48,7 +48,7 @@ export const LanguageGateway = () => {
           onPress={() => setLanguage('en')}
           activeOpacity={0.7}
           className="items-center"
-          accessibilityLabel="Select English language"
+          accessibilityLabel={t('gateway_english_a11y')}
           accessibilityRole="button"
         >
           <StyledMotiView
@@ -63,7 +63,7 @@ export const LanguageGateway = () => {
             </StyledText>
           </StyledMotiView>
           <StyledText className="mt-4 text-midnight/40 font-sans text-xs uppercase tracking-[2]">
-            Universal
+            {t('gateway_english_subtitle')}
           </StyledText>
         </StyledTouchableOpacity>
       </StyledView>

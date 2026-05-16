@@ -5,7 +5,7 @@ import { styled } from 'nativewind';
 import { SealCheck } from 'phosphor-react-native';
 import { LegalResponse, TripleArtifactHUD } from '@/shared/ui/Legal';
 import { HybridIntake } from '@/features/intake/components/HybridIntake';
-import { intakeApi, LandDisputeState } from '@/features/intake/api/intake';
+import { LandDisputeState } from '@/features/intake/api/intake';
 
 const StyledScrollView = styled(ScrollView);
 const StyledView = styled(View);
@@ -20,8 +20,12 @@ export default function MobileHubScreen() {
   const handleRecordingComplete = async (uri: string) => {
     setIsProcessing(true);
     try {
-      const response = await intakeApi.processVoice({ uri, name: 'audio.m4a', type: 'audio/m4a' }, caseState);
-      setCaseState(response.updated_state);
+      // MOCK DELAY
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      setCaseState(prev => ({
+        ...prev,
+        description: prev.description ? prev.description + " [Voice Note Added]" : "[Voice Note Added]"
+      }));
     } catch (err) {
       console.error("Error processing voice:", err);
     } finally {
@@ -32,8 +36,12 @@ export default function MobileHubScreen() {
   const handleTextSubmit = async (text: string) => {
     setIsProcessing(true);
     try {
-      const response = await intakeApi.processText(text, caseState);
-      setCaseState(response.updated_state);
+      // MOCK DELAY
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setCaseState(prev => ({
+        ...prev,
+        description: prev.description ? prev.description + " " + text : text
+      }));
     } catch (err) {
       console.error("Error processing text:", err);
     } finally {
@@ -63,7 +71,7 @@ export default function MobileHubScreen() {
             Mizan
           </StyledText>
           <StyledText className="text-midnight/50 italic mt-2 font-serif text-lg text-center">
-            "Speak your truth. We will find the law."
+            "Making the law accessible for everyone."
           </StyledText>
         </StyledView>
 
