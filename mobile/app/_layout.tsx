@@ -7,6 +7,7 @@ import { useEffect, useState, useContext } from 'react';
 import 'react-native-reanimated';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, AuthContext } from '../src/context/AuthContext';
+import { I18nProvider } from '../src/context/I18nContext';
 
 import {
   CrimsonText_400Regular,
@@ -59,11 +60,13 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <RootLayoutNav />
-      </AuthProvider>
-    </QueryClientProvider>
+    <I18nProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <RootLayoutNav />
+        </AuthProvider>
+      </QueryClientProvider>
+    </I18nProvider>
   );
 }
 
@@ -79,9 +82,10 @@ function RootLayoutNav() {
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!auth?.isAuthenticated && !inAuthGroup) {
-      // Redirect to the login page if they are not authenticated
-      router.replace('/(auth)/login');
+      // Redirect to the welcome page if they are not authenticated
+      router.replace('/(auth)/welcome');
     } else if (auth?.isAuthenticated && inAuthGroup) {
+
       // Redirect to the hub if they are authenticated but trying to access auth screens
       router.replace('/(tabs)');
     }
