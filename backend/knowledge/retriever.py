@@ -6,6 +6,22 @@ from backend.knowledge.vector_store import VectorStore
 from backend.knowledge.types import Chunk
 
 BM25_INDEX_DIR = os.path.join("backend", "knowledge", "indices")
+RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+# Lazy singleton — loaded once on first retrieve() call
+_reranker = None
+
+def _get_reranker():
+    global _reranker
+    if _reranker is None:
+        try:
+            from sentence_transformers import CrossEncoder
+            _reranker = CrossEncoder(RERANKER_MODEL)
+            print(f"[reranker] Loaded {RERANKER_MODEL}")
+        except Exception as e:
+            print(f"[reranker] Failed to load — skipping rerank: {e}")
+            _reranker = False  # sentinel: don't retry
+    return _reranker if _reranker is not False else None
 
 class HybridRetriever:
     def __init__(self, domains: List[str]):
@@ -92,8 +108,21 @@ class HybridRetriever:
                 
         if not combined_candidates:
             return []
-            
-        # 4. Simple score-based ranking (no Cohere needed)
-        # Vector store results already come back sorted by distance (cosine)
-        # BM25 adds keyword coverage — combined set is deduplicated above
+
+        # 4. Cross-encoder reranking (ms-marco-MiniLM-L-6-v2)
+        reranker = _get_reranker()
+        if reranker is not None and combined_candidates:
+            try:
+                pairs  = [(query, c.text) for c in combined_candidates]
+                scores = reranker.predict(pairs)          # numpy array of relevance logits
+                ranked = sorted(
+                    zip(scores, combined_candidates),
+                    key=lambda x: x[0],
+                    reverse=True,
+                )
+                combined_candidates = [c for _, c in ranked]
+                print(f"[reranker] Re-ranked {len(combined_candidates)} candidates → top {top_n}")
+            except Exception as e:
+                print(f"[reranker] Error during reranking (falling back to retrieval order): {e}")
+
         return combined_candidates[:top_n]

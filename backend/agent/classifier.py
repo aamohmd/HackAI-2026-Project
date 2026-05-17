@@ -1,27 +1,18 @@
 import os
-import google.generativeai as genai
+import json
+from groq import Groq
 from pydantic import BaseModel
 
-# Initialize Gemini if key exists, otherwise placeholder (e.g. tests)
-if "GEMINI_API_KEY" in os.environ:
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-    
-model = genai.GenerativeModel("gemini-2.0-flash")
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-CLASSIFIER_TOOL = {
-    "name": "submit_intent",
-    "description": "Submit classified intent based on transcript",
-    "parameters": {
-        "type": "object",
-        "properties": {
-            "domain": {"type": "string", "description": "Legal domain (e.g. family_law, land, labour, civil_debt)"},
-            "intent": {"type": "string", "description": "The specific intent or question being asked"},
-            "confidence": {"type": "number", "description": "Confidence score from 0.0 to 1.0"},
-            "missing_context": {"type": "string", "description": "What context is missing to give a good answer, if any"}
-        },
-        "required": ["domain", "intent", "confidence", "missing_context"]
-    }
-}
+CLASSIFIER_SYSTEM = """You are an intent classifier for Mizan, a Moroccan legal AI assistant.
+The user's transcript is in Moroccan Darija (or Arabic). Analyze and classify the legal intent.
+Output a JSON object with exactly these fields:
+- domain: legal domain string (e.g. "family_law", "land_law", "criminal_law", "civil_law", "labour_law")
+- intent: the specific legal question or intent being asked
+- confidence: float from 0.0 to 1.0 — how confident you are in the classification
+- missing_context: what additional context is needed for a precise answer (empty string if none)
+"""
 
 class ClassificationResult(BaseModel):
     domain: str
@@ -30,21 +21,19 @@ class ClassificationResult(BaseModel):
     missing_context: str
 
 def classify_intent(transcript: str) -> ClassificationResult:
-    prompt = f"""
-    You are an intent classifier for Mizan, a Moroccan legal AI.
-    The user's transcript is in Moroccan Darija. Analyze and classify the intent.
-    Transcript: {transcript}
     """
-    
-    response = model.generate_content(
-        contents=[{"role": "user", "parts": [prompt]}],
-        tools=[{"function_declarations": [CLASSIFIER_TOOL]}],
-        tool_config={"function_calling_config": {"mode": "ANY"}}
+    Ultra-fast intent classification via Groq Llama 3.1 8B (~200ms).
+    Replaces the previous Gemini 2.0 Flash call (~1.2s).
+    """
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[
+            {"role": "system", "content": CLASSIFIER_SYSTEM},
+            {"role": "user",   "content": f"Transcript: {transcript}"},
+        ],
+        response_format={"type": "json_object"},
+        temperature=0,
     )
-    
-    # Extract the function call arguments
-    call = response.candidates[0].content.parts[0].function_call
-    # Convert protobuf struct to dict
-    args_dict = dict(call.args.items())
-    
-    return ClassificationResult(**args_dict)
+
+    data = json.loads(response.choices[0].message.content)
+    return ClassificationResult(**data)

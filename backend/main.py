@@ -22,6 +22,17 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     # Ensure upload directory exists
     ensure_upload_dir()
+    # Pre-warm HybridRetriever models in background thread (E5 + reranker + BM25)
+    # Eliminates ~8s cold-start penalty on first request
+    import threading
+    def _prewarm():
+        try:
+            from .services.agents import _get_retriever
+            _get_retriever()
+            logger.info("✅ HybridRetriever pre-warmed (E5 + reranker + BM25)")
+        except Exception as e:
+            logger.warning(f"⚠️ Model pre-warm failed (non-fatal): {e}")
+    threading.Thread(target=_prewarm, daemon=True).start()
     yield
 
 app = FastAPI(title="Mizan API", lifespan=lifespan)

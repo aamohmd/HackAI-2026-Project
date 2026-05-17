@@ -8,11 +8,12 @@ python-multipart
 argon2-cffi
 slowapi
 groq
+openai
 twilio
 chromadb
 rank-bm25
-cohere
 rapidfuzz
+sentence-transformers
 google-generativeai
 edge-tts
 websockets

@@ -25,23 +25,23 @@ Every component runs on free tiers or locally on Apple Silicon. No billing requi
 | Mobile | React Native + Expo | Free | Single codebase, Arabic RTL, fast iteration |
 | Backend | FastAPI + Uvicorn | Free | Async WebSocket, lightweight |
 | Orchestration | Plain Python state machine | Free | Debuggable, no framework lock-in |
-| LLM | Llama 3.3 (via Groq) | Free | High-speed inference, function calling, strong logic |
-| Embeddings | Cohere Embed v3 multilingual | Free (trial key, no card) | Darija code-switching, handles variant spellings |
-| Reranker | Cohere Rerank multilingual v3 | Free (same key) | Arabic-native, no local model needed |
+| Extraction LLM | Llama 3.3 (via Groq) | Free | Fast intent extraction & structured function calling |
+| Legal Reasoning LLM | GPT-5-mini (via OpenAI) | API Cost | Primary legal reasoning, counter-arguments, and synthesis |
+| Embeddings | `multilingual-e5-base` | Free | Local execution via SentenceTransformers, handles Darija code-switching |
+| Reranker | `ms-marco-MiniLM-L-6-v2` | Free | Local execution via CrossEncoder, highly accurate Arabic ranking |
 | Vector store | ChromaDB (file-based) | Free | Zero infra, persists to disk |
 | Keyword search | rank_bm25 | Free | Catches exact article number citations |
-| STT | Whisper medium via mlx-whisper | Free | ~4s on M4 Neural Engine, works offline |
-| TTS | edge-tts (`ar-MA-JamalNeural`) | Free (no key) | Microsoft Edge TTS public endpoint |
+| STT | Whisper Large v3 (via Groq) | Free | Cloud offload for maximum speed and accuracy on Moroccan Arabic |
+| TTS | ElevenLabs / edge-tts (`ar-MA-JamalNeural`) | API / Free | High-fidelity voice synthesis with fallback |
 | Audio compression | Opus 16kbps (expo-av) | Free | ~80% smaller than WAV on upload |
 | User profile | SQLite | Free | Literacy score, wilaya, feedback log |
-| Offline cache | SQLite + RapidFuzz | Free | Fuzzy match, zero connectivity fallback |
 
-**What runs on M4:** Whisper medium (STT) + FastAPI process + ChromaDB reads. Everything cognitively heavy — LLM calls, embeddings, reranking — is offloaded to free cloud APIs.
+**What runs on M4:** Local Embedding + Reranking (SentenceTransformers) + FastAPI process + ChromaDB reads. Heavy LLM reasoning and STT are offloaded to fast cloud APIs (Groq & OpenAI).
 
 ### Get your free keys
 
-- **Llama 3.3:** https://aistudio.google.com/app/apikey — no billing, no credit card
-- **Cohere:** https://dashboard.cohere.com — trial key gives embeddings + rerank free
+- **Groq:** https://console.groq.com/keys — for Llama 3.3 and Whisper Large v3
+- **OpenAI:** For the `gpt-5-mini` reasoning pipeline.
 
 ---
 
@@ -71,38 +71,38 @@ Every component runs on free tiers or locally on Apple Silicon. No billing requi
 │                         BACKEND  (FastAPI)                        │
 │                                                                   │
 │  ┌──────────────────────────────────────────────────────────┐    │
-│  │  STT   Whisper medium via mlx-whisper (local, M4)        │    │
-│  │        ~4s for 10s clip · works fully offline            │    │
+│  │  STT   Whisper Large v3 (via Groq API)                   │    │
+│  │        ~1s for 10s clip · maximum Arabic accuracy        │    │
 │  └─────────────────────────┬────────────────────────────────┘    │
 │                            │ Darija transcript                    │
 │                            ▼                                      │
 │  ┌──────────────────────────────────────────────────────────┐    │
-│  │  Step 1 — Intent classifier  (Llama 3.3 function call #1)   │    │
-│  │    → domain · intent · confidence · missing_context      │    │
-│  │    → if confidence < 0.7: generate clarifying question   │    │
+│  │  Step 1 — Intent classifier  (Llama 3.3 function call)      │    │
+│  │    → extracts intent, context, and checks if complete    │    │
+│  │    → if missing info: generates clarifying question      │    │
 │  └─────────────────────────┬────────────────────────────────┘    │
 │                            ▼                                      │
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Step 2 — Hybrid retriever                               │    │
 │  │    Filter to domain namespace in ChromaDB                │    │
-│  │    BM25 top-20 + Cohere Embed v3 top-20                  │    │
-│  │    Cohere Rerank multilingual → top 5 chunks             │    │
+│  │    BM25 top-20 + multilingual-e5-base top-20             │    │
+│  │    CrossEncoder ms-marco reranking → top 6 chunks        │    │
 │  └─────────────────────────┬────────────────────────────────┘    │
 │                            ▼                                      │
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Step 3 — Multi-agent confidence debate  ★               │    │
 │  │                                                          │    │
-│  │  Call A — Primary agent  (Llama 3.3 function call #2)       │    │
+│  │  Call A — Primary agent  (GPT-5-mini function call #2)      │    │
 │  │    Tool: submit_legal_answer                             │    │
 │  │    Output: answer_darija · citations[] · confidence      │    │
 │  │                     │                                    │    │
 │  │                     ▼                                    │    │
-│  │  Call B — Devil's advocate  (Llama 3.3 function call #3)    │    │
+│  │  Call B — Devil's advocate  (GPT-5-mini function call #3)   │    │
 │  │    Tool: score_claims                                    │    │
 │  │    Output: grounded | hedged | not_in_context per claim  │    │
 │  │                     │                                    │    │
 │  │                     ▼                                    │    │
-│  │  Call C — Synthesis agent  (Llama 3.3 function call #4)     │    │
+│  │  Call C — Synthesis agent  (GPT-5-mini function call #4)    │    │
 │  │    Removes not_in_context claims                         │    │
 │  │    Softens hedged claims → final confidence score        │    │
 │  └─────────────────────────┬────────────────────────────────┘    │
@@ -111,29 +111,26 @@ Every component runs on free tiers or locally on Apple Silicon. No billing requi
 │  │  Step 4 — Answer formatter                               │    │
 │  │    Reads literacy_score from user mental model           │    │
 │  │    Adjusts Darija register + sentence complexity         │    │
-│  │    Appends nearest tribunal + hotline by wilaya          │    │
 │  │    If recommend_lawyer → adds lawyer referral banner     │    │
 │  └─────────────────────────┬────────────────────────────────┘    │
 │                            ▼                                      │
 │  ┌──────────────────────────────────────────────────────────┐    │
-│  │  TTS   edge-tts ar-MA-JamalNeural (streamed)             │    │
+│  │  TTS   ElevenLabs / edge-tts ar-MA (streamed)            │    │
 │  │        Degrades gracefully to text-only if offline       │    │
 │  └─────────────────────────┬────────────────────────────────┘    │
 │                            ▼                                      │
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Feedback loop                                           │    │
-│  │    Thumbs up/down → update literacy_score + topic log    │    │
-│  │    confidence < 0.6 → push to pro-bono review queue      │    │
+│  │    Thumbs up/down → update literacy_score                │    │
 │  └──────────────────────────────────────────────────────────┘    │
 └──────────────────────────────────────────────────────────────────┘
          │                    │                     │
          ▼                    ▼                     ▼
   ┌─────────────┐    ┌──────────────┐    ┌───────────────┐
-  │  Llama 3.3 API │    │   ChromaDB   │    │    SQLite     │
+  │ OpenAI/Groq │    │   ChromaDB   │    │    SQLite     │
   │ (4 calls    │    │ (namespaced, │    │ sessions,     │
-  │  per query) │    │  file-based) │    │ review queue, │
-  └─────────────┘    └──────────────┘    │ offline cache │
-                                         └───────────────┘
+  │  per query) │    │  file-based) │    │ review queue  │
+  └─────────────┘    └──────────────┘    └───────────────┘
 ```
 
 ---
@@ -302,42 +299,27 @@ The answer formatter maps `literacy_score` to register:
 
 ## Retrieval Pipeline
 
-### Embeddings
+### Embeddings & Reranking
 
 ```python
-import cohere
+from sentence_transformers import SentenceTransformer, CrossEncoder
 
-co = cohere.ClientV2(os.environ["COHERE_API_KEY"])  # SDK v5+
+# Run locally on CPU/M4
+embedder = SentenceTransformer("intfloat/multilingual-e5-base")
+reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 
 def embed_query(text: str) -> list[float]:
-    return co.embed(
-        texts=[text],
-        model="embed-multilingual-v3.0",
-        input_type="search_query"
-    ).embeddings[0]
+    # e5 requires prefix for queries
+    return embedder.encode([f"query: {text}"]).tolist()[0]
 
-def embed_documents(chunks: list[str]) -> list[list[float]]:
-    return co.embed(
-        texts=chunks,
-        model="embed-multilingual-v3.0",
-        input_type="search_document"
-    ).embeddings
-```
-
-### Reranking
-
-```python
 def rerank(query: str, chunks: list[Chunk], top_n: int = 5) -> list[Chunk]:
-    results = co.rerank(
-        query=query,
-        documents=[c.text for c in chunks],
-        model="rerank-multilingual-v3.0",
-        top_n=top_n
-    )
-    return [chunks[r.index] for r in results.results]
+    pairs = [[query, c.text] for c in chunks]
+    scores = reranker.predict(pairs)
+    # Sort and return top_n
+    ...
 ```
 
-Both use the same free Cohere trial key. No local model. No M4 load.
+Both run locally via HuggingFace's transformers. No API keys needed.
 
 ### Hybrid retriever flow
 
@@ -346,9 +328,9 @@ query
   │
   ├── BM25 (rank_bm25) ──── top 20 (exact article number recall)
   │
-  ├── Cohere Embed v3 ───── top 20 (semantic Darija similarity)
+  ├── multilingual-e5-base ─ top 20 (semantic Darija similarity)
   │
-  └── deduplicate → Cohere Rerank → top 5 Chunk objects
+  └── deduplicate → ms-marco CrossEncoder → top 6 Chunk objects
 ```
 
 Domain namespace filtering (one Chroma collection per domain) is applied before vector search, using the classifier's `domain` output.
@@ -357,21 +339,25 @@ Domain namespace filtering (one Chroma collection per domain) is applied before 
 
 ## STT and TTS
 
-### Speech-to-text — Whisper medium on M4
+### Speech-to-text — Whisper Large v3 on Groq
 
 ```python
-import mlx_whisper
+from groq import Groq
+
+client = Groq()
 
 def transcribe(audio_path: str) -> str:
-    result = mlx_whisper.transcribe(
-        audio_path,
-        path_or_hf_repo="mlx-community/whisper-medium-mlx",
-        language="ar"
-    )
-    return result["text"]
+    with open(audio_path, "rb") as file:
+        transcription = client.audio.transcriptions.create(
+            file=(audio_path, file.read()),
+            model="whisper-large-v3",
+            language="ar",
+            response_format="json"
+        )
+        return transcription.text
 ```
 
-First run downloads the model (~300 MB, one time). Subsequent runs use the Neural Engine — ~4 seconds for a 10-second clip. Fully offline after download.
+Offloaded to Groq's LPU infrastructure. Sub-second latency for audio processing with maximum accuracy for Moroccan Darija accents.
 
 ### Text-to-speech — edge-tts (no key required)
 

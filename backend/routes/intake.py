@@ -8,9 +8,10 @@ from groq import Groq
 from ..database import get_db
 from ..dependencies import get_current_user
 from ..models import User
-from ..services.agents import extract_facts, get_next_question, LandDisputeState
+from ..services.agents import extract_facts, get_next_question, LegalDossierState
 from ..utils import UPLOAD_DIR, ensure_upload_dir
 from ..speech.tts import speak
+from ..profile.model import get_profile
 
 router = APIRouter(prefix="/intake", tags=["intake"])
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -28,7 +29,7 @@ async def process_voice(
     db: Session = Depends(get_db)
 ):
     try:
-        current_state = LandDisputeState.model_validate_json(state_json)
+        current_state = LegalDossierState.model_validate_json(state_json)
         ensure_upload_dir()
         file_ext = file.filename.split(".")[-1] if "." in file.filename else "wav"
         temp_filename = f"intake_{uuid.uuid4()}.{file_ext}"
@@ -49,10 +50,23 @@ async def process_voice(
         if os.path.exists(temp_path):
             os.remove(temp_path)
 
+        profile = get_profile(current_user.id)
         return await _process_common(db, current_user.id, transcript, current_state, dossier_id)
         
     except Exception as e:
         print(f"Intake Voice Error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/speak")
+async def tts_speak(text: str):
+    try:
+        ensure_upload_dir()
+        filename = f"speak_{uuid.uuid4()}.mp3"
+        path = os.path.join(UPLOAD_DIR, filename)
+        await speak(text, path)
+        return {"audio_url": f"uploads/{filename}"}
+    except Exception as e:
+        print(f"TTS Speak Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/text")
@@ -62,18 +76,21 @@ async def process_text(
     db: Session = Depends(get_db)
 ):
     try:
-        current_state = LandDisputeState.model_validate_json(request.state_json)
+        current_state = LegalDossierState.model_validate_json(request.state_json)
+        profile = get_profile(current_user.id)
         return await _process_common(db, current_user.id, request.text, current_state, request.dossier_id)
     except Exception as e:
         print(f"Intake Text Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-async def _process_common(db: Session, user_id: str, text: str, current_state: LandDisputeState, dossier_id: Optional[str]):
+async def _process_common(db: Session, user_id: str, text: str, current_state: LegalDossierState, dossier_id: Optional[str]):
     # 1. Agentic Chain: Extract Facts
     updated_state = await extract_facts(text, current_state)
     
-    # 2. Agentic Chain: Get Next Question
-    next_question = await get_next_question(updated_state)
+    # 2. Agentic Chain: Get Next Question (skip if complete — saves ~600ms)
+    next_question = None
+    if not updated_state.is_complete:
+        next_question = await get_next_question(updated_state)
     
     # 3. Persistence
     if dossier_id:
@@ -103,13 +120,16 @@ async def _process_common(db: Session, user_id: str, text: str, current_state: L
         dossier.state = updated_state.model_dump()
         db.commit()
 
-    # 5. Generate Question Audio if not complete (overwriting previous one for this user)
+    # 5. Always generate question audio when not complete (guarantees auto-play reliability)
     next_question_audio_url = None
     if not updated_state.is_complete and next_question:
         question_filename = f"question_{user_id}.mp3"
         question_path = os.path.join(UPLOAD_DIR, question_filename)
-        await speak(next_question, question_path)
-        next_question_audio_url = f"uploads/{question_filename}"
+        try:
+            await speak(next_question, question_path)
+            next_question_audio_url = f"uploads/{question_filename}"
+        except Exception as tts_err:
+            print(f"TTS error for question audio (non-fatal): {tts_err}")
 
     return {
         "updated_state": updated_state,
@@ -118,5 +138,6 @@ async def _process_common(db: Session, user_id: str, text: str, current_state: L
         "next_question_audio_url": next_question_audio_url,
         "dossier_id": dossier.id
     }
+
 
 

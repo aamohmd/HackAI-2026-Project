@@ -71,7 +71,6 @@ class Chunk(BaseModel):
 class UserProfile(BaseModel):
     user_id: str
     wilaya: str
-    literacy_score: float = 0.5   # 0 = very simple Darija, 1 = technical register
     topics_asked: List[str] = []
     low_conf_count: int = 0
     feedback_log: List[Dict] = []
@@ -80,14 +79,6 @@ class UserProfile(BaseModel):
         self.feedback_log.append({"up": thumbs_up, "conf": answer_confidence})
         if not thumbs_up and answer_confidence < 0.6:
             self.low_conf_count += 1
-        self._recalculate_literacy()
-
-    def _recalculate_literacy(self):
-        recent = self.feedback_log[-10:]
-        if not recent:
-            return
-        positive_rate = sum(1 for f in recent if f["up"]) / max(len(recent), 1)
-        self.literacy_score = 0.8 * self.literacy_score + 0.2 * positive_rate
 
 class Citation(BaseModel):
     article_number: str

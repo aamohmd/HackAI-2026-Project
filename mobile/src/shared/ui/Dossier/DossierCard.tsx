@@ -26,8 +26,8 @@ export const DossierCard = ({ name, icon, description, completed }: DossierCardP
       </StyledText>
     </StyledView>
     <StyledText className="text-midnight/80 text-sm leading-relaxed min-h-[20px] font-serif">
-      {description || <StyledText className="text-midnight/30 italic font-serif">Information required...</StyledText>}
+      {description || <StyledText className="text-midnight/30 italic font-serif">معلومات مطلوبة...</StyledText>}
     </StyledText>
-    {completed && <RubberStamp text="Motabaq" />}
+    {completed && <RubberStamp text="مطابق" />}
   </StyledView>
 );

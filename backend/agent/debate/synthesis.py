@@ -1,26 +1,28 @@
 import os
-import google.generativeai as genai
+import json
+from openai import OpenAI
 from backend.schemas import FinalAnswer, PrimaryAnswer, ClaimScores
 from backend.prompts import SYSTEM_SYNTHESIS, build_synthesis_prompt
 from backend.tools import SYNTHESIS_TOOL
 
-genai.configure(api_key=os.environ.get("GEMINI_API_KEY", "dummy_key_for_tests"))
+openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", ""))
 
 def call_synthesis_agent(primary: PrimaryAnswer, scores: ClaimScores) -> FinalAnswer:
-    model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
-        system_instruction=SYSTEM_SYNTHESIS
-    )
-    
     primary_dict = primary.model_dump()
-    scores_dict = scores.model_dump()
+    scores_dict  = scores.model_dump()
     prompt = build_synthesis_prompt(primary_dict, scores_dict)
-    
-    response = model.generate_content(
-        contents=[{"role": "user", "parts": [prompt]}],
-        tools=[{"function_declarations": [SYNTHESIS_TOOL]}],
-        tool_config={"function_calling_config": {"mode": "ANY"}}
+
+    response = openai_client.chat.completions.create(
+        model="gpt-5-mini",
+        messages=[
+            {"role": "system", "content": SYSTEM_SYNTHESIS},
+            {"role": "user",   "content": prompt},
+        ],
+        tools=[{"type": "function", "function": SYNTHESIS_TOOL}],
+        tool_choice={"type": "function", "function": {"name": "submit_synthesis"}},
+        temperature=0.1,
     )
-    
-    call = response.candidates[0].content.parts[0].function_call
-    return FinalAnswer(**dict(call.args))
+
+    tc = response.choices[0].message.tool_calls[0]
+    args = json.loads(tc.function.arguments)
+    return FinalAnswer(**args)

@@ -14,52 +14,75 @@ class AgentLoop:
         self.profile = profile
 
     async def run(self) -> AsyncGenerator[dict, None]:
-        # Step 1: STT
+        loop = asyncio.get_event_loop()
+
+        # Step 1: STT — wrapped in executor (sync Groq call)
         yield {"type": "status", "data": "transcribing"}
         try:
-            # In a real environment we would save the audio stream to disk first
-            # For this mock, we assume audio_path is already written
-            transcript = transcribe(self.audio_path)
+            transcript = await loop.run_in_executor(
+                None, transcribe, self.audio_path
+            )
             yield {"type": "transcript", "data": transcript}
         except Exception as e:
             yield {"type": "error", "data": f"STT Error: {e}"}
             return
 
-        # Step 2: Classifier
+        # Step 2: Classifier — wrapped in executor (sync call)
         yield {"type": "status", "data": "classifying_intent"}
         try:
-            classification = classify_intent(transcript)
+            classification = await loop.run_in_executor(
+                None, classify_intent, transcript
+            )
         except Exception as e:
             yield {"type": "error", "data": f"Classification Error: {e}"}
             return
-            
+
         # Step 3: Clarifier check
         if classification.confidence < 0.7:
             yield {"type": "status", "data": "clarifying"}
-            question = generate_clarifying_question(transcript, classification.missing_context)
+            question = await loop.run_in_executor(
+                None, generate_clarifying_question, transcript, classification.missing_context
+            )
             yield {"type": "clarifying_question", "data": question}
-            # Stream the clarifying question TTS
             async for chunk in stream_speak(question):
                 b64_audio = base64.b64encode(chunk).decode('utf-8')
                 yield {"type": "audio_chunk", "data": b64_audio}
             return
 
-        # Step 4 & 5: Retrieve and Debate (Mocked - waiting for AI Dev 1 & 2)
-        yield {"type": "status", "data": "retrieving_and_debating"}
-        final_answer = FinalAnswer(
-            answer_darija="القانون كيقول...",
-            citations=[
-                Citation(article_number="12", law_name="مدونة الأسرة", claim_supported="الجواب")
-            ],
-            confidence=0.85,
-            recommend_lawyer=False
-        )
-        
+        # Step 4: Retrieve — singleton retriever (no per-request model reload)
+        yield {"type": "status", "data": "retrieving"}
+        try:
+            from backend.services.agents import _get_retriever, _detect_domain
+            retriever = _get_retriever()
+            if retriever is None:
+                yield {"type": "error", "data": "Retriever unavailable — knowledge base not loaded"}
+                return
+            domain = _detect_domain(transcript)
+            chunks = await loop.run_in_executor(
+                None, lambda: retriever.retrieve(transcript, domain=domain, top_n=6)
+            )
+            yield {"type": "status", "data": f"retrieved_{len(chunks)}_chunks"}
+        except Exception as e:
+            yield {"type": "error", "data": f"Retrieval Error: {e}"}
+            return
+
+        # Step 5: Debate Loop — Primary Agent → Devil's Advocate → Synthesis Agent
+        yield {"type": "status", "data": "debating"}
+        try:
+            from backend.agent.debate.loop import DebateLoop
+            debate = DebateLoop(max_retries=2)
+            final_answer = await loop.run_in_executor(
+                None, lambda: debate.run(transcript, chunks, self.profile)
+            )
+        except Exception as e:
+            yield {"type": "error", "data": f"Debate Error: {e}"}
+            return
+
         # Step 6: Formatter
         yield {"type": "status", "data": "formatting"}
         formatted_answer = format_answer(final_answer, self.profile)
         yield {"type": "final_answer", "data": formatted_answer.model_dump()}
-        
+
         # Step 7: TTS Stream
         yield {"type": "status", "data": "speaking"}
         try:

@@ -1,19 +1,23 @@
 import os
 import json
 import asyncio
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel, Field
 import google.generativeai as genai
 from groq import AsyncGroq
+from openai import AsyncOpenAI
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Configure GenAI SDK with GEMINI_API_KEY
+# Configure GenAI SDK (used only by classifier — primary agent migrated to GPT-4o-mini)
 genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
-# Use AsyncGroq - The fastest LLM provider for fact extraction and RAG (non-blocking)
+# Groq — ultra-fast for STT, fact extraction, interviewer (Llama 3.3 / 3.1)
 groq_client = AsyncGroq(api_key=os.getenv("GROQ_API_KEY"))
+
+# OpenAI — GPT-5 mini for primary legal generation (strong Arabic legal reasoning, low hallucination)
+openai_client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 class Citation(BaseModel):
     article_number: str
@@ -30,7 +34,7 @@ class MizanResult(BaseModel):
     recommend_lawyer: bool
     answer_register: str # 'simple', 'standard', 'technical'
 
-class LandDisputeState(BaseModel):
+class LegalDossierState(BaseModel):
     claimant_name: Optional[str] = None
     opponent_name: Optional[str] = None
     location: Optional[str] = None
@@ -46,31 +50,53 @@ class VerifyChunk(BaseModel):
     law_name: str
     text: str
 
+# ── Lazy singleton for HybridRetriever ──────────────────────────────────────
+# Initialised once on first use to avoid import-time weight loading.
+_retriever = None
+
+def _get_retriever():
+    global _retriever
+    if _retriever is None:
+        try:
+            from backend.knowledge.retriever import HybridRetriever
+            _retriever = HybridRetriever(
+                domains=["land_law", "civil_law", "family_law", "criminal_law"]
+            )
+            print("[agents] HybridRetriever initialised.")
+        except Exception as e:
+            print(f"[agents] HybridRetriever unavailable — falling back to mock: {e}")
+            _retriever = None
+    return _retriever
+
+# Fallback mock corpus (used only when ChromaDB/BM25 indices are absent)
 MOROCCAN_LAND_LAWS = [
-    {"article_number": "Article 1", "law_name": "Dahir on Land Registration", "law_code": "1-11-177", "content": "Registration of land provides absolute proof of ownership and is opposable to third parties."},
+    {"article_number": "Article 1",  "law_name": "Dahir on Land Registration", "law_code": "1-11-177", "content": "Registration of land provides absolute proof of ownership and is opposable to third parties."},
     {"article_number": "Article 62", "law_name": "Dahir on Land Registration", "law_code": "1-11-177", "content": "Any real right relating to a registered building exists only by its registration in the land registry."},
-    {"article_number": "Article 42", "law_name": "Code of Real Rights", "law_code": "39-08", "content": "Ownership of land includes the space above and the ground below."},
-    {"article_number": "Article 3", "law_name": "Code of Real Rights", "law_code": "39-08", "content": "Possession (L-hiaza) must be peaceful, public, and continuous for 10 years to create a presumption of ownership between individuals."}
+    {"article_number": "Article 42", "law_name": "Code of Real Rights",        "law_code": "39-08",    "content": "Ownership of land includes the space above and the ground below."},
+    {"article_number": "Article 3",  "law_name": "Code of Real Rights",        "law_code": "39-08",    "content": "Possession (L-hiaza) must be peaceful, public, and continuous for 10 years to create a presumption of ownership between individuals."}
 ]
 
 SYSTEM_PROMPT_EXTRACTOR = """
-You are a legal paralegal assistant specialized in Moroccan land disputes. 
-Your task is to extract facts from a user's testimony transcript.
-Update the current state JSON based on the new transcript.
-Do not hallucinate facts. If information is missing, leave it as null.
-Transcript language: Moroccan Darija (transcribed).
-Output MUST be a valid JSON matching the schema.
+أنت مساعد قانوني مغربي (ميزان).
+مهمتك تستخرج الحقائق من شهادة المستخدم لبناء ملف قانوني عام (عقار، أسرة، شغل، مدني، جنائي...).
+حدّث JSON ديال الحالة الحالية بناء على النص الجديد.
+ما تخترعش حقائق. إلا معلومة مامشاش، خليها null.
+مهم جدا: بمجرد أن يحكي المستخدم المشكلة (description)، اجعل `is_complete = true` فورا! لا تسأل عن الأسماء أو التفاصيل الأخرى. الهدف هو فهم المشكل القانوني فقط.
+لغة النص: الدارجة المغربية (مكتوبة).
+الخرجة خاصها تكون JSON صالح يطابق المخطط.
 """
 
 SYSTEM_PROMPT_INTERVIEWER = """
-You are Mizan, a supportive legal counselor in rural Morocco. 
-The user is a farmer or villager who might be illiterate. 
-Speak in friendly, clear Moroccan Darija (written phonetically).
-Your goal is to listen to their story and help them build a legal brief.
-Based on the current extracted facts, identify what is missing and ask ONE follow-up question.
-Missing facts prioritize: Location, Opponent Name, Proof Type.
-If all major facts are present, thank the user and say their dossier is sealed and ready for the judge.
+أنت ميزان، مستشار قانوني ودود في المغرب.
+المستخدم ممكن يكون فلاح أو ساكن في القرية، يمكن ما كيعرفش يقرا.
+هضر معاه بالدارجة المغربية الواضحة والبسيطة.
+مهمتك تسمع ليه وتساعدو يبني ملف قانوني.
+شوف شنو ناقص في الحقائق وسول سؤال واحد فقط باش تزيد تفهم المشكل.
+ركز غير على المعلومات الأساسية (شكون معاه المشكل، شنو وقع).
+إلا كانت المشكلة واضحة، ما تبقاش تسول بزاف، شكرو وقول ليه الملف تختم.
 """
+
+
 
 # ─────────────────────────────────────────────
 # TOOL SCHEMA — PRIMARY AGENT
@@ -89,9 +115,10 @@ TOOL_SUBMIT_LEGAL_ANSWER = {
             "answer_darija": {
                 "type": "string",
                 "description": (
-                    "الجواب القانوني الرسمي بالعربية الفصحى المبسطة. "
+                    "الجواب القانوني بالدارجة المغربية. "
                     "استخدم Markdown: ## العناوين، - النقاط. "
-                    "اذكر كل مادة قانونية بالضبط مع رقم الفصل."
+                    "اذكر كل مادة قانونية بالضبط مع رقم الفصل. "
+                    "ما تستعملش الفصحى الصعبة — خاص المستخدم يفهم."
                 ),
             },
             "answer_verbal": {
@@ -177,8 +204,7 @@ SYSTEM_PRIMARY = """أنت "ميزان"، مساعد قانوني مغربي م�
 3. كل claim خاصها chunk_index وkey_terms من النص الأصلي.
 4. إذا ما لقيتيش المعلومة، قول بصراحة "ما عنديش معلومة كافية في هاد الموضوع".
 5. ما تتصورش أنك محامي — أنت كتعطي معلومات، مش مشورة قانونية.
-6. إذا كان literacy_score < 0.4: بسّط الكلام أكثر في answer_verbal.
-7. النبرة في answer_verbal: صديق يشرح، مش أستاذ يحاضر.
+6. النبرة في answer_verbal: صديق يشرح، مش أستاذ يحاضر.
 """
 
 # ─────────────────────────────────────────────
@@ -188,67 +214,64 @@ SYSTEM_PRIMARY = """أنت "ميزان"، مساعد قانوني مغربي م�
 def build_primary_prompt(
     transcript: str,
     chunks: list[VerifyChunk],
-    literacy_score: float,
 ) -> str:
     chunks_text = "\n\n---\n\n".join([
         f"[Chunk {i}]\nLaw: {c.law_name}\nArticle: {c.article_number}\nText: {c.text}"
         for i, c in enumerate(chunks)
     ])
+
     return (
         f"السؤال: {transcript}\n\n"
-        f"مستوى القراءة (0-1): {literacy_score}\n\n"
         f"النصوص القانونية المتاحة ({len(chunks)} نص):\n\n"
         f"{chunks_text}"
     )
 
 # ─────────────────────────────────────────────
-# GEMINI CALLER (async wrapper)
+# GPT-4o-mini CALLER (async, function calling)
 # ─────────────────────────────────────────────
 
-async def _call_gemini(
+async def _call_openai(
     system: str,
     prompt: str,
     tool: dict,
     tool_name: str,
-    tool_mode: str = "ANY",
 ) -> Optional[dict]:
     """
-    Async wrapper around the sync Gemini SDK.
-    Returns the tool call arguments dict, or None if the model didn't call the tool.
+    Async GPT-4o-mini caller with function calling.
+    Returns the parsed function arguments dict, or None on failure.
     """
-    model = genai.GenerativeModel(
-        model_name="gemini-2.0-flash",
-        system_instruction=system,
-        tools=[{"function_declarations": [tool]}],
-        tool_config={"function_calling_config": {"mode": tool_mode}},
+    response = await openai_client.chat.completions.create(
+        model="gpt-5-mini",
+        messages=[
+            {"role": "system", "content": system},
+            {"role": "user",   "content": prompt},
+        ],
+        tools=[{"type": "function", "function": tool}],
+        tool_choice={"type": "function", "function": {"name": tool_name}},
+        temperature=0.1,   # low temp for deterministic legal answers
     )
 
-    response = await asyncio.get_event_loop().run_in_executor(
-        None, lambda: model.generate_content(prompt)
-    )
-
-    for part in response.candidates[0].content.parts:
-        if hasattr(part, "function_call") and part.function_call.name == tool_name:
-            return dict(part.function_call.args)
-
+    msg = response.choices[0].message
+    if msg.tool_calls:
+        for tc in msg.tool_calls:
+            if tc.function.name == tool_name:
+                return json.loads(tc.function.arguments)
     return None
 
 # ─────────────────────────────────────────────
-# AGENT 1 — PRIMARY (LLM)
+# AGENT 1 — PRIMARY (GPT-4o-mini)
 # ─────────────────────────────────────────────
 
 async def run_primary_agent(
     transcript: str,
     chunks: list[VerifyChunk],
-    literacy_score: float = 0.5,
 ) -> dict:
-    prompt = build_primary_prompt(transcript, chunks, literacy_score)
-    result = await _call_gemini(
+    prompt = build_primary_prompt(transcript, chunks)
+    result = await _call_openai(
         system=SYSTEM_PRIMARY,
         prompt=prompt,
         tool=TOOL_SUBMIT_LEGAL_ANSWER,
         tool_name="submit_legal_answer",
-        tool_mode="ANY",
     )
     if result is None:
         raise ValueError("Primary agent did not call submit_legal_answer.")
@@ -345,33 +368,79 @@ def apply_hedging_disclaimer(answer_verbal: str, verdicts: list[dict]) -> str:
     return answer_verbal
 
 # ─────────────────────────────────────────────
-# RAG SEARCH PIPELINE
+# RAG SEARCH PIPELINE  (real HybridRetriever)
 # ─────────────────────────────────────────────
 
+# Domain routing: map description keywords → retriever domain
+_DOMAIN_KEYWORDS = {
+    "land_law":     ["أرض", "ملكية", "عقار", "تسجيل", "رسم عقاري", "حيازة", "land", "property", "registration"],
+    "family_law":   ["زواج", "طلاق", "نفقة", "حضانة", "إرث", "family", "divorce", "custody"],
+    "criminal_law": ["جريمة", "سرقة", "اعتداء", "criminal", "theft", "assault"],
+    "civil_law":    ["عقد", "ضرر", "تعويض", "contract", "damage", "civil"],
+}
+
+def _detect_domain(text: str) -> str:
+    """Heuristic domain detection from description text."""
+    text_lower = text.lower()
+    scores = {domain: 0 for domain in _DOMAIN_KEYWORDS}
+    for domain, keywords in _DOMAIN_KEYWORDS.items():
+        for kw in keywords:
+            if kw in text_lower:
+                scores[domain] += 1
+    best = max(scores, key=scores.get)
+    return best if scores[best] > 0 else "land_law"  # default
+
+
 async def search_relevant_laws(description: str) -> list[Citation]:
-    # Simulated RAG: Use LLM to find which mock laws apply
+    """
+    Real RAG via HybridRetriever (ChromaDB + BM25).
+    Falls back to LLM-over-mock if the retriever is unavailable.
+    """
+    retriever = _get_retriever()
+
+    # ── Path A: Real retriever ────────────────────────────────────────────────
+    if retriever is not None:
+        try:
+            domain = _detect_domain(description)
+            loop   = asyncio.get_event_loop()
+            chunks = await loop.run_in_executor(
+                None, lambda: retriever.retrieve(description, domain=domain, top_n=6)
+            )
+            citations = []
+            for chunk in chunks:
+                citations.append(Citation(
+                    article_number  = chunk.article_number,
+                    law_name        = chunk.law_name,
+                    law_code        = chunk.law_code,
+                    claim_supported = chunk.text,
+                ))
+            print(f"[RAG] Retrieved {len(citations)} chunks from domain '{domain}'.")
+            return citations
+        except Exception as e:
+            print(f"[RAG] HybridRetriever error — falling back to LLM mock: {e}")
+
+    # ── Path B: Fallback LLM-over-mock corpus ────────────────────────────────
     try:
         response = await groq_client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": "Identify which Moroccan law articles from this list apply to the case. Output JSON list of citations."},
-                {"role": "user", "content": f"Laws: {MOROCCAN_LAND_LAWS}\nCase: {description}"}
+                {"role": "user",   "content": f"Laws: {MOROCCAN_LAND_LAWS}\nCase: {description}"}
             ],
             response_format={"type": "json_object"}
         )
-        # Parse and return Citations
         data = json.loads(response.choices[0].message.content)
         citations_data = data.get("citations", data.get("articles", []))
         return [Citation(**c) for c in citations_data if isinstance(c, dict)]
     except Exception as e:
-        print(f"RAG Error: {e}")
+        print(f"[RAG] Fallback LLM error: {e}")
         return []
 
 # ─────────────────────────────────────────────
 # FULL DUAL-TRACK PIPELINE
 # ─────────────────────────────────────────────
 
-async def generate_final_brief(state: LandDisputeState) -> MizanResult:
+async def generate_final_brief(state: LegalDossierState) -> MizanResult:
     """
     Full lean pipeline:
       Step 1 — Primary Agent (LLM Gemini 2.0 Flash)
@@ -451,7 +520,7 @@ async def generate_final_brief(state: LandDisputeState) -> MizanResult:
 # MAIN INTENT EXTRACTION & INTERVIEW PIPELINE
 # ─────────────────────────────────────────────
 
-async def extract_facts(transcript: str, current_state: LandDisputeState) -> LandDisputeState:
+async def extract_facts(transcript: str, current_state: LegalDossierState) -> LegalDossierState:
     try:
         response = await groq_client.chat.completions.create(
             model="llama-3.3-70b-versatile",
@@ -462,7 +531,7 @@ async def extract_facts(transcript: str, current_state: LandDisputeState) -> Lan
             response_format={"type": "json_object"}
         )
         updated_data = response.choices[0].message.content
-        new_state = LandDisputeState.model_validate_json(updated_data)
+        new_state = LegalDossierState.model_validate_json(updated_data)
         
         # Add interim citations if description is available
         if new_state.description:
@@ -477,16 +546,52 @@ async def extract_facts(transcript: str, current_state: LandDisputeState) -> Lan
         print(f"Error extracting facts: {e}")
         return current_state
 
-async def get_next_question(state: LandDisputeState) -> str:
+async def get_next_question(state: LegalDossierState) -> str:
+    system_msg = (
+        SYSTEM_PROMPT_INTERVIEWER + "\n\n"
+        "تعليمات مهمة بزاف:\n"
+        "- ما تعاودش تقول شكون أنت أو شنو مهمتك.\n"
+        "- ما تشرحش القواعد أو التعليمات.\n"
+        "- الخرجة ديالك خاصها تكون غير سؤال واحد بالدارجة المغربية.\n"
+        "- بلا مقدمات، بلا تفسيرات — غير السؤال."
+    )
+
+    # Build a concise user prompt showing only what's missing
+    state_dict = state.model_dump()
+    missing = [k for k in ["claimant_name", "opponent_name", "description"]
+               if not state_dict.get(k)]
+    filled  = {k: v for k, v in state_dict.items() if v and k not in ["is_complete", "mizan_result", "interim_citations"]}
+
+    user_msg = (
+        f"الحقائق المستخرجة: {filled}\n"
+        f"الناقص: {missing}\n"
+        f"سول سؤال واحد فقط بالدارجة باش تعرف المعلومة الناقصة."
+    )
+
     try:
         response = await groq_client.chat.completions.create(
-            model="llama-3.1-8b-instant", # Ultra-fast for chat responses
+            model="llama-3.1-8b-instant",
             messages=[
-                {"role": "system", "content": SYSTEM_PROMPT_INTERVIEWER},
-                {"role": "user", "content": f"Current State: {state.model_dump_json()}"}
-            ]
+                {"role": "system", "content": system_msg},
+                {"role": "user", "content": user_msg}
+            ],
+            temperature=0.3,
+            max_tokens=100,  # short answer only
         )
-        return response.choices[0].message.content
+        answer = response.choices[0].message.content.strip()
+        # Safety: if the model still echoes system prompt, strip it
+        if "أنت ميزان" in answer or "مهمتك" in answer:
+            lines = answer.split("\n")
+            # Take only the last meaningful line (usually the actual question)
+            question_lines = [l.strip() for l in lines if l.strip() and "؟" in l]
+            if question_lines:
+                return question_lines[-1]
+            # Fallback: take the last non-empty line
+            non_empty = [l.strip() for l in lines if l.strip()]
+            if non_empty:
+                return non_empty[-1]
+        return answer
     except Exception as e:
         print(f"Error getting next question: {e}")
-        return "Mumkin t-zid t-sharrah liya ktar? (Can you explain more to me?)"
+        return "واش تقدر تزيد تشرح ليا شوية؟"
+

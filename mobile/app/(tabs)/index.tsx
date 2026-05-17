@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScrollView, View, Text, ActivityIndicator, KeyboardAvoidingView, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
-import { SealCheck, Question, SpeakerHigh, Pause } from 'phosphor-react-native';
+import { SealCheck, Question, SpeakerHigh, Pause, User, MapPin, Calendar, File, Scales, IdentificationCard } from 'phosphor-react-native';
 import { LegalResponse, TripleArtifactHUD } from '@/shared/ui/Legal';
 import { HybridIntake } from '@/features/intake/components/HybridIntake';
-import { LandDisputeState, intakeApi } from '@/features/intake/api/intake';
+import { LegalDossierState, intakeApi } from '@/features/intake/api/intake';
 import { useI18n } from '@/context/I18nContext';
 import { Audio } from 'expo-av';
 import api from '@/shared/api/client';
@@ -16,9 +16,37 @@ const StyledText = styled(Text);
 const StyledKAV = styled(KeyboardAvoidingView);
 const StyledPressable = styled(Pressable);
 
+// ─── Progress Bar ────────────────────────────────────────────
+const DOSSIER_FIELDS = [
+  { key: 'claimant_name',    Icon: User },
+  { key: 'opponent_name',   Icon: IdentificationCard },
+  { key: 'location',        Icon: MapPin },
+  { key: 'date_of_incident', Icon: Calendar },
+  { key: 'proof_type',      Icon: File },
+  { key: 'description',     Icon: Scales },
+] as const;
+
+const DossierProgress = ({ state }: { state: LegalDossierState }) => {
+  const filled = DOSSIER_FIELDS.filter(f => !!(state as any)[f.key]).length;
+  return (
+    <StyledView className="flex-row justify-center items-center gap-3 mb-6">
+      {DOSSIER_FIELDS.map(({ key, Icon }, i) => {
+        const done = !!(state as any)[key];
+        return (
+          <StyledView key={key} className={`items-center justify-center w-10 h-10 rounded-full border-2 ${
+            done ? 'bg-wax border-wax' : 'bg-transparent border-midnight/15'
+          }`}>
+            <Icon size={16} color={done ? 'white' : '#1E293B40'} weight={done ? 'fill' : 'regular'} />
+          </StyledView>
+        );
+      })}
+    </StyledView>
+  );
+};
+
 export default function MobileHubScreen() {
   const insets = useSafeAreaInsets();
-  const [caseState, setCaseState] = useState<LandDisputeState>({ is_complete: false });
+  const [caseState, setCaseState] = useState<LegalDossierState>({ is_complete: false });
   const [isProcessing, setIsProcessing] = useState(false);
   const [agentQuestion, setAgentQuestion] = useState<string | null>(null);
   const [nextQuestionAudioUrl, setNextQuestionAudioUrl] = useState<string | null>(null);
@@ -51,7 +79,6 @@ export default function MobileHubScreen() {
         allowsRecordingIOS: false,
         playsInSilentModeIOS: true,
         staysActiveInBackground: false,
-        shouldRouteThroughEarpieceIOS: false,
       });
 
       const fullUrl = `${api.defaults.baseURL}${urlPath}`;
@@ -100,7 +127,14 @@ export default function MobileHubScreen() {
     setNextQuestionAudioUrl(null);
     // Stop any active audio
     if (sound) {
-      await sound.stopAsync();
+      try {
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded) {
+          await sound.stopAsync();
+        }
+      } catch (e) {
+        console.log("Audio already stopped/unloaded");
+      }
     }
     try {
       const response = await intakeApi.processVoice({
@@ -113,11 +147,9 @@ export default function MobileHubScreen() {
       setAgentQuestion(response.next_question);
       setNextQuestionAudioUrl(response.next_question_audio_url || null);
 
-      // Auto-play intermediate question audio upon delivery
+      // Auto-play intermediate question audio — wait for state to settle
       if (response.next_question_audio_url && !response.updated_state.is_complete) {
-        setTimeout(() => {
-          playAudio(response.next_question_audio_url!);
-        }, 400);
+        await playAudio(response.next_question_audio_url);
       }
     } catch (err: any) {
       console.error("Error processing voice:", err);
@@ -132,7 +164,14 @@ export default function MobileHubScreen() {
     setNextQuestionAudioUrl(null);
     // Stop any active audio
     if (sound) {
-      await sound.stopAsync();
+      try {
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded) {
+          await sound.stopAsync();
+        }
+      } catch (e) {
+        console.log("Audio already stopped/unloaded");
+      }
     }
     try {
       const response = await intakeApi.processText(text, caseState);
@@ -140,11 +179,9 @@ export default function MobileHubScreen() {
       setAgentQuestion(response.next_question);
       setNextQuestionAudioUrl(response.next_question_audio_url || null);
 
-      // Auto-play intermediate question audio upon delivery
+      // Auto-play intermediate question audio — wait for state to settle
       if (response.next_question_audio_url && !response.updated_state.is_complete) {
-        setTimeout(() => {
-          playAudio(response.next_question_audio_url!);
-        }, 400);
+        await playAudio(response.next_question_audio_url);
       }
     } catch (err: any) {
       console.error("Error processing text:", err);
@@ -157,10 +194,13 @@ export default function MobileHubScreen() {
     // Stop any active audio
     if (sound) {
       try {
-        await sound.stopAsync();
-        await sound.unloadAsync();
+        const status = await sound.getStatusAsync();
+        if (status.isLoaded) {
+          await sound.stopAsync();
+          await sound.unloadAsync();
+        }
       } catch (e) {
-        console.error(e);
+        console.log("Audio already cleaned up");
       }
       setSound(null);
     }
@@ -209,50 +249,47 @@ export default function MobileHubScreen() {
           )}
         </StyledView>
 
+        {/* Dossier Progress Bar — shown once any field is filled */}
+        {(caseState.claimant_name || caseState.location || caseState.description) && !caseState.is_complete && (
+          <DossierProgress state={caseState} />
+        )}
+
         {agentQuestion && !caseState.is_complete && (
           <StyledView className="mb-8 p-6 bg-white border-2 border-midnight/5 shadow-sm relative overflow-hidden">
             <StyledView className="absolute -top-4 -right-4 opacity-5">
               <Question size={80} color="#1E293B" weight="fill" />
             </StyledView>
-            <StyledView className="mb-4 flex-row justify-between items-center">
-              <StyledView className="flex-row items-center">
-                <StyledView className="size-2 bg-wax rounded-full mr-2" />
-                <StyledText className="text-[10px] font-bold text-midnight/40 uppercase tracking-[2] font-sans">
-                  {t('agent_question_title')}
-                </StyledText>
-              </StyledView>
-
-              {/* Premium Listen Button for Intermediate Question */}
-              {nextQuestionAudioUrl && (
-                <StyledPressable 
-                  onPress={() => {
-                    playingUrl === nextQuestionAudioUrl ? togglePlayback() : playAudio(nextQuestionAudioUrl);
-                  }}
-                  className="flex-row items-center gap-1.5 bg-wax/10 border border-wax/20 px-3 py-1 rounded-full active:opacity-75"
-                >
-                  {playingUrl === nextQuestionAudioUrl && isPlaying ? (
-                    <Pause size={12} color="#9A3412" weight="fill" />
-                  ) : (
-                    <SpeakerHigh size={12} color="#9A3412" weight="fill" />
-                  )}
-                  <StyledText className="text-wax text-[10px] font-sans font-bold uppercase tracking-wider">
-                    {playingUrl === nextQuestionAudioUrl && isPlaying ? "Pause" : "Listen"}
-                  </StyledText>
-                </StyledPressable>
-              )}
+            <StyledView className="mb-3 flex-row items-center">
+              <StyledView className="size-2 bg-wax rounded-full mr-2" />
+              <StyledText className="text-[10px] font-bold text-midnight/40 uppercase tracking-[2] font-sans">
+                {t('agent_question_title')}
+              </StyledText>
             </StyledView>
-            <StyledText className="text-midnight text-xl font-serif leading-relaxed">
+            <StyledText className="text-midnight text-xl font-serif leading-relaxed mb-5">
               {agentQuestion}
             </StyledText>
-            <StyledText className="mt-3 text-[10px] text-wax font-bold uppercase tracking-[1] font-sans">
-              {t('agent_question_subtitle')}
-            </StyledText>
+
+            {/* Large full-width Listen Again button */}
+            {nextQuestionAudioUrl && (
+              <StyledPressable
+                onPress={() => {
+                  playingUrl === nextQuestionAudioUrl ? togglePlayback() : playAudio(nextQuestionAudioUrl);
+                }}
+                className="flex-row items-center justify-center gap-2 bg-wax/10 border-2 border-wax/25 py-3 rounded-xl active:opacity-75"
+              >
+                {playingUrl === nextQuestionAudioUrl && isPlaying ? (
+                  <Pause size={20} color="#9A3412" weight="fill" />
+                ) : (
+                  <SpeakerHigh size={20} color="#9A3412" weight="fill" />
+                )}
+                <StyledText className="text-wax text-sm font-bold font-serif">
+                  {playingUrl === nextQuestionAudioUrl && isPlaying ? 'إيقاف' : 'استمع مرة أخرى'}
+                </StyledText>
+              </StyledPressable>
+            )}
           </StyledView>
         )}
 
-        {!caseState.mizan_result && (
-          <TripleArtifactHUD citations={caseState.interim_citations || []} />
-        )}
 
         {caseState.mizan_result && (
           <StyledView className="mb-8">

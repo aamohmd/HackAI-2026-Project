@@ -82,7 +82,7 @@ export default function SettingsScreen() {
           <SettingItem 
             icon={UserIcon} 
             title={t('registered_phone')} 
-            value={auth?.user?.phone_number || "Not Available"} 
+            value={auth?.user?.phone_number || "غير متوفر"} 
           />
           <SettingItem 
             icon={ShieldCheck} 
@@ -109,7 +109,7 @@ export default function SettingsScreen() {
           <SettingItem 
             icon={Info} 
             title={t('version')} 
-            value="Mizan v1.0.4 - Production" 
+            value="ميزان v1.0.4 - إنتاج" 
           />
         </StyledView>
 
@@ -127,7 +127,7 @@ export default function SettingsScreen() {
              {t('justice_quote')}
            </StyledText>
            <StyledText className="text-[10px] mt-2 font-sans uppercase tracking-[2]">
-             HackAI 2026 - Moroccan Legal Tech
+             HackAI 2026 - تكنولوجيا قانونية مغربية
            </StyledText>
         </StyledView>
       </StyledScrollView>

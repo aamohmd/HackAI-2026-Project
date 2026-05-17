@@ -1,14 +1,14 @@
-# Gemini tool schemas for structured output
+# GPT-4o-mini tool schemas for structured output
 
 ANSWER_TOOL = {
     "name": "submit_legal_answer",
-    "description": "Submit a grounded legal answer in Darija. You must call this function. Do not produce free text.",
+    "description": "Submit a grounded legal answer in Moroccan Darija. You must call this function. Do not produce free text.",
     "parameters": {
         "type": "object",
         "properties": {
             "answer_darija": {
                 "type": "string",
-                "description": "The full answer in Moroccan Darija"
+                "description": "الجواب الكامل بالدارجة المغربية. ما تستعملش الفصحى الصعبة."
             },
             "citations": {
                 "type": "array",
@@ -64,7 +64,7 @@ SYNTHESIS_TOOL = {
         "properties": {
             "answer_darija": {
                 "type": "string",
-                "description": "The final edited answer in Moroccan Darija"
+                "description": "الجواب النهائي المعدل بالدارجة المغربية. ما تستعملش الفصحى الصعبة."
             },
             "citations": {
                 "type": "array",

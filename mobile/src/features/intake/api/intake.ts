@@ -18,7 +18,7 @@ export interface MizanResult {
   answer_register: 'simple' | 'standard' | 'technical';
 }
 
-export interface LandDisputeState {
+export interface LegalDossierState {
   dossier_id?: string;
   claimant_name?: string;
   opponent_name?: string;
@@ -32,7 +32,7 @@ export interface LandDisputeState {
 }
 
 export interface IntakeResponse {
-  updated_state: LandDisputeState;
+  updated_state: LegalDossierState;
   transcript: string;
   next_question: string;
   next_question_audio_url?: string;
@@ -40,7 +40,7 @@ export interface IntakeResponse {
 }
 
 export const intakeApi = {
-  processVoice: async (file: { uri: string; name: string; type: string }, state: LandDisputeState): Promise<IntakeResponse> => {
+  processVoice: async (file: { uri: string; name: string; type: string }, state: LegalDossierState): Promise<IntakeResponse> => {
     const formData = new FormData();
     
     formData.append('file', {
@@ -73,7 +73,7 @@ export const intakeApi = {
     return await response.json();
   },
 
-  processText: async (text: string, state: LandDisputeState): Promise<IntakeResponse> => {
+  processText: async (text: string, state: LegalDossierState): Promise<IntakeResponse> => {
     const response = await api.post('intake/text', {
       text,
       state_json: JSON.stringify(state),

@@ -1,7 +1,7 @@
 import os
 import sys
 import re
-import uuid
+import hashlib
 import time
 import pickle
 import logging
@@ -339,7 +339,10 @@ def legal_chunk(
         # E5 passage prefix: stored docs must start with "passage: "
         embedded_text = E5_PASSAGE_PREFIX + full_text
 
-        chunk_id = f"{law_code}_{re.sub(r'\\s+', '_', article_label)}_{uuid.uuid4().hex[:8]}"
+        # Deterministic ID: same article content always → same ID
+        # MD5 of stripped content so ChromaDB upsert correctly overwrites on re-run
+        content_hash = hashlib.md5(content.strip().encode()).hexdigest()[:8]
+        chunk_id = f"{law_code}_{re.sub(r'\s+', '_', article_label)}_{content_hash}"
 
         chunks.append({
             "id":             chunk_id,
@@ -399,8 +402,11 @@ def save_bm25_index(domain: str, new_chunks: list[dict]):
             with open(index_path, "rb") as f:
                 existing = pickle.load(f).get("chunks", [])
 
-        # Use display_text (no E5 prefix) for BM25 keyword matching
-        all_chunks = existing + new_chunks
+        # Deduplicate by ID before merging — prevents BM25 index bloat on re-runs
+        existing_ids = {c["id"] for c in existing}
+        new_unique   = [c for c in new_chunks if c["id"] not in existing_ids]
+        all_chunks   = existing + new_unique
+        logger.info(f"  BM25 merge: {len(existing)} existing + {len(new_unique)} new (skipped {len(new_chunks) - len(new_unique)} dupes)")
         corpus     = [c.get("display_text", c["text"]).split() for c in all_chunks]
         bm25       = BM25Okapi(corpus)
 

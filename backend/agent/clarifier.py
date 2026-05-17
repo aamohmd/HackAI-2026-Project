@@ -1,21 +1,29 @@
 import os
-import google.generativeai as genai
+from groq import Groq
 
-if "GEMINI_API_KEY" in os.environ:
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-    
-model = genai.GenerativeModel("gemini-2.0-flash")
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
 def generate_clarifying_question(transcript: str, missing_context: str) -> str:
-    prompt = f"""
-    أنت "ميزان"، مساعد قانوني مغربي.
-    The user asked a legal question but we are missing context to give a precise answer.
-    
-    Transcript: {transcript}
-    Missing context: {missing_context}
-    
-    Write a short, polite follow-up question in Moroccan Darija asking for this missing context.
-    Only output the question, nothing else.
     """
-    response = model.generate_content(prompt)
-    return response.text.strip()
+    Generates a polite follow-up question in Moroccan Darija.
+    Uses Groq Llama 3.1 8B (~200ms) instead of Gemini (~1s).
+    """
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[
+            {"role": "system", "content": (
+                "أنت \"ميزان\"، مساعد قانوني مغربي.\n"
+                "The user asked a legal question but we are missing context.\n"
+                "Write a short, polite follow-up question in Moroccan Darija "
+                "asking for the missing context.\n"
+                "Output ONLY the question, nothing else."
+            )},
+            {"role": "user", "content": (
+                f"Transcript: {transcript}\n"
+                f"Missing context: {missing_context}"
+            )},
+        ],
+        temperature=0.3,
+        max_tokens=150,
+    )
+    return response.choices[0].message.content.strip()

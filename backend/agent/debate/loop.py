@@ -16,8 +16,7 @@ class DebateLoop:
         primary = self._execute_with_retry(
             func=call_primary_agent,
             transcript=transcript,
-            chunks=chunks,
-            literacy_score=user.literacy_score
+            chunks=chunks
         )
         
         # Step 2: Devil's Advocate scores the claims

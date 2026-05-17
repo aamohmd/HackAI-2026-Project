@@ -1,9 +1,9 @@
 import api from '@/shared/api/client';
-import { LandDisputeState } from './intake';
+import { LegalDossierState } from './intake';
 
 export interface DossierEntry {
   id: string;
-  state: LandDisputeState;
+  state: LegalDossierState;
   status: 'draft' | 'sealed';
   created_at: string;
   updated_at: string;
