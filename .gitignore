@@ -1,7 +1,71 @@
+# ── Secrets ───────────────────────────────────────────────────
 .env
-__pycache__
+.env.*
+!.env.example
+
+# ── Python ────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# ── Virtual environments ───────────────────────────────────────
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# ── Database files ─────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+
+# ── Knowledge indices (generated — run seed_knowledge.py) ─────
+backend/knowledge/indices/chroma/
+backend/knowledge/indices/*.pkl
+
+# ── Uploaded media (runtime-generated) ────────────────────────
+uploads/
+!uploads/.gitkeep
+
+# ── macOS ─────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+
+# ── IDE / Editor ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.claude/
+
+# ── TypeScript build ───────────────────────────────────────────
+*.tsbuildinfo
+
+# ── Docs / internal planning ──────────────────────────────────
 docs/
 .superpowers/
-test.db
-test_avatar.db
-*.tsbuildinfo
+
+# ── Jupyter ───────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── Logs ──────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Docker volumes ────────────────────────────────────────────
+pgdata/

@@ -4,9 +4,11 @@ import { House, Gear } from 'phosphor-react-native';
 
 import Colors from '@/constants/Colors';
 import { useColorScheme } from '@/components/useColorScheme';
+import { useI18n } from '@/context/I18nContext';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { t } = useI18n();
 
   return (
     <Tabs
@@ -33,7 +35,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'The Hub',
+          title: t('tab_hub'),
           tabBarIcon: ({ color }) => <House size={24} color={color} weight="duotone" />,
         }}
       />
@@ -41,7 +43,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Settings',
+          title: t('tab_settings'),
           tabBarIcon: ({ color }) => <Gear size={24} color={color} weight="duotone" />,
         }}
       />

@@ -1,7 +1,7 @@
 import os
 import unittest
 import google.generativeai as genai
-from api.tools import ANSWER_TOOL, SCORE_CLAIMS_TOOL, SYNTHESIS_TOOL
+from backend.tools import ANSWER_TOOL, SCORE_CLAIMS_TOOL, SYNTHESIS_TOOL
 
 class TestToolSchemas(unittest.TestCase):
     @classmethod

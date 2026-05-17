@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
 import { SignOut, User as UserIcon, ShieldCheck, Info, CaretRight } from 'phosphor-react-native';
 import { AuthContext } from '@/context/AuthContext';
+import { useI18n } from '@/context/I18nContext';
 
 const StyledScrollView = styled(ScrollView);
 const StyledView = styled(View);
@@ -13,15 +14,17 @@ const StyledTouchableOpacity = styled(TouchableOpacity);
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const auth = useContext(AuthContext);
+  const { t, locale } = useI18n();
+  const isRTL = locale === 'ar';
 
   const handleLogout = () => {
     Alert.alert(
-      "Confirm Logout",
-      "Are you sure you want to log out from the Mizan system?",
+      t('confirm_logout_title'),
+      t('confirm_logout_msg'),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t('cancel'), style: "cancel" },
         { 
-          text: "Log Out", 
+          text: t('logout'), 
           style: "destructive", 
           onPress: () => auth?.logout() 
         }
@@ -39,12 +42,12 @@ export default function SettingsScreen() {
         <Icon size={20} color={destructive ? '#9A3412' : '#1E293B'} weight="duotone" />
       </StyledView>
       
-      <StyledView className="flex-1 ml-4">
-        <StyledText className={`text-sm font-bold uppercase tracking-[1] font-sans ${destructive ? 'text-wax' : 'text-midnight/60'}`}>
+      <StyledView className={`flex-1 ${isRTL ? 'mr-4' : 'ml-4'}`}>
+        <StyledText className={`text-sm font-bold uppercase tracking-[1] font-sans ${isRTL ? 'text-right' : 'text-left'} ${destructive ? 'text-wax' : 'text-midnight/60'}`}>
           {title}
         </StyledText>
         {value && (
-          <StyledText className="text-midnight font-serif text-lg mt-0.5">
+          <StyledText className={`text-midnight font-serif text-lg mt-0.5 ${isRTL ? 'text-right' : 'text-left'}`}>
             {value}
           </StyledText>
         )}
@@ -64,48 +67,48 @@ export default function SettingsScreen() {
         }}
       >
         <StyledView className="px-5 mb-8">
-          <StyledText className="text-3xl font-bold text-midnight uppercase tracking-[2] font-serif">
-            Settings
+          <StyledText className={`text-3xl font-bold text-midnight uppercase tracking-[2] font-serif ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('settings_title')}
           </StyledText>
-          <StyledText className="text-midnight/50 font-sans text-sm mt-1 uppercase tracking-[1]">
-            System Configuration & Profile
+          <StyledText className={`text-midnight/50 font-sans text-sm mt-1 uppercase tracking-[1] ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('settings_subtitle')}
           </StyledText>
         </StyledView>
 
         <StyledView className="mb-8">
-          <StyledText className="px-5 text-[11px] font-bold text-midnight/30 uppercase tracking-[2] mb-3 font-sans">
-            User Profile
+          <StyledText className={`px-5 text-[11px] font-bold text-midnight/30 uppercase tracking-[2] mb-3 font-sans ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('user_profile')}
           </StyledText>
           <SettingItem 
             icon={UserIcon} 
-            title="Registered Phone" 
+            title={t('registered_phone')} 
             value={auth?.user?.phone_number || "Not Available"} 
           />
           <SettingItem 
             icon={ShieldCheck} 
-            title="Verification Status" 
-            value="Verified Citizen" 
+            title={t('verification_status')} 
+            value={t('verified_citizen')} 
           />
         </StyledView>
 
         <StyledView className="mb-8">
-          <StyledText className="px-5 text-[11px] font-bold text-midnight/30 uppercase tracking-[2] mb-3 font-sans">
-            Legal Disclaimer
+          <StyledText className={`px-5 text-[11px] font-bold text-midnight/30 uppercase tracking-[2] mb-3 font-sans ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('legal_disclaimer_title')}
           </StyledText>
           <StyledView className="mx-5 p-5 bg-white/40 border-2 border-midnight/10 rounded-sm">
-            <StyledText className="text-midnight/60 text-xs font-serif italic leading-relaxed">
-              "Mizan is an AI-assisted legal aid system. The information provided is for educational purposes and does not constitute formal legal advice. Please consult with a registered attorney for sensitive legal matters."
+            <StyledText className={`text-midnight/60 text-xs font-serif italic leading-relaxed ${isRTL ? 'text-right' : 'text-left'}`}>
+              "{t('legal_disclaimer_text')}"
             </StyledText>
           </StyledView>
         </StyledView>
 
         <StyledView className="mb-8">
-          <StyledText className="px-5 text-[11px] font-bold text-midnight/30 uppercase tracking-[2] mb-3 font-sans">
-            About System
+          <StyledText className={`px-5 text-[11px] font-bold text-midnight/30 uppercase tracking-[2] mb-3 font-sans ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('about_system')}
           </StyledText>
           <SettingItem 
             icon={Info} 
-            title="Version" 
+            title={t('version')} 
             value="Mizan v1.0.4 - Production" 
           />
         </StyledView>
@@ -113,7 +116,7 @@ export default function SettingsScreen() {
         <StyledView className="mt-4">
           <SettingItem 
             icon={SignOut} 
-            title="Logout Session" 
+            title={t('logout_session')} 
             onPress={handleLogout}
             destructive
           />
@@ -121,7 +124,7 @@ export default function SettingsScreen() {
 
         <StyledView className="items-center mt-12 opacity-20">
            <StyledText className="text-midnight font-serif italic">
-             Justice is the scale of the world.
+             {t('justice_quote')}
            </StyledText>
            <StyledText className="text-[10px] mt-2 font-sans uppercase tracking-[2]">
              HackAI 2026 - Moroccan Legal Tech

@@ -10,6 +10,8 @@ export interface Citation {
 
 export interface MizanResult {
   answer_darija: string;
+  answer_verbal?: string;
+  audio_url?: string;
   citations: Citation[];
   confidence: number;
   recommend_lawyer: boolean;
@@ -33,6 +35,7 @@ export interface IntakeResponse {
   updated_state: LandDisputeState;
   transcript: string;
   next_question: string;
+  next_question_audio_url?: string;
   dossier_id: string;
 }
 

@@ -5,6 +5,7 @@ import { styled } from 'nativewind';
 import { Link, useRouter } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
 import { UserPlus, WhatsappLogo, CheckCircle } from 'phosphor-react-native';
+import { useI18n } from '@/context/I18nContext';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -20,8 +21,10 @@ export default function RegisterScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSendingOtp, setIsSendingOtp] = useState(false);
   
-  const auth = useContext(AuthContext);
+   const auth = useContext(AuthContext);
   const router = useRouter();
+  const { t, locale } = useI18n();
+  const isRTL = locale === 'ar';
 
   if (!auth) return null;
 
@@ -77,17 +80,17 @@ export default function RegisterScreen() {
             <StyledView className="items-center mb-10">
               <StyledView className="w-16 h-1 bg-wax mb-8 rounded-full" />
               <StyledText className="text-3xl font-bold text-midnight uppercase tracking-[4] font-serif text-center">
-                New Dossier
+                {t('register_title')}
               </StyledText>
               <StyledText className="text-midnight/40 italic mt-2 font-serif text-center">
-                Establish your legal identity
+                {t('register_subtitle')}
               </StyledText>
             </StyledView>
 
             <StyledView className="space-y-6">
               <StyledView>
-                <StyledText className="text-[10px] font-bold text-midnight/40 uppercase tracking-[2] mb-2 ml-1 font-sans">
-                  Phone Number
+                <StyledText className={`text-[10px] font-bold text-midnight/40 uppercase tracking-[2] mb-2 ml-1 font-sans ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('phone_number')}
                 </StyledText>
                 <StyledView className="flex-row items-center">
                   <StyledTextInput
@@ -118,8 +121,8 @@ export default function RegisterScreen() {
               {otpSent && (
                 <View>
                   <StyledView className="mt-4">
-                    <StyledText className="text-[10px] font-bold text-midnight/40 uppercase tracking-[2] mb-2 ml-1 font-sans">
-                      Verification Code (OTP)
+                    <StyledText className={`text-[10px] font-bold text-midnight/40 uppercase tracking-[2] mb-2 ml-1 font-sans ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('verification_code')}
                     </StyledText>
                     <StyledTextInput
                       placeholder="1234"
@@ -130,13 +133,13 @@ export default function RegisterScreen() {
                       className="bg-white/50 border-2 border-wax p-4 rounded-lg text-midnight font-serif text-lg tracking-[4] text-center"
                     />
                     <StyledText className="text-[10px] text-wax font-bold uppercase tracking-[-0.5] mt-2 text-center">
-                      Code sent via WhatsApp
+                      {t('otp_sent_msg')}
                     </StyledText>
                   </StyledView>
 
                   <StyledView className="mt-4">
-                    <StyledText className="text-[10px] font-bold text-midnight/40 uppercase tracking-[2] mb-2 ml-1 font-sans">
-                      Dossier Password
+                    <StyledText className={`text-[10px] font-bold text-midnight/40 uppercase tracking-[2] mb-2 ml-1 font-sans ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('password')}
                     </StyledText>
                     <StyledTextInput
                       placeholder="••••••••"
@@ -170,9 +173,9 @@ export default function RegisterScreen() {
                   <ActivityIndicator color="white" />
                 ) : (
                   <>
-                    <CheckCircle size={20} color="white" weight="bold" className="mr-2" />
+                    <CheckCircle size={20} color="white" weight="bold" style={{ marginRight: 8 }} />
                     <StyledText className="text-white font-bold uppercase tracking-[4] ml-2 font-sans">
-                      Finalize Registration
+                      {t('finalize_registration')}
                     </StyledText>
                   </>
                 )}
@@ -180,17 +183,17 @@ export default function RegisterScreen() {
             ) : (
               <StyledView className="bg-midnight/5 p-5 rounded-lg border-2 border-dashed border-midnight/10">
                 <StyledText className="text-midnight/30 text-center font-sans uppercase tracking-wider text-xs">
-                  Awaiting phone verification...
+                  {t('awaiting_verification')}
                 </StyledText>
               </StyledView>
             )}
 
             <StyledView className="flex-row justify-center mt-8">
-              <StyledText className="text-midnight/50 font-serif">Already registered? </StyledText>
+              <StyledText className="text-midnight/50 font-serif">{t('already_registered')} </StyledText>
               <Link href="/(auth)/login" asChild>
                 <StyledTouchableOpacity>
                   <StyledText className="text-wax font-bold uppercase tracking-[2] text-xs font-sans">
-                    Identify Self
+                    {t('identify_self')}
                   </StyledText>
                 </StyledTouchableOpacity>
               </Link>

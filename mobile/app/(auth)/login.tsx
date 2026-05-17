@@ -5,6 +5,7 @@ import { styled } from 'nativewind';
 import { Link, useRouter } from 'expo-router';
 import { AuthContext } from '@/context/AuthContext';
 import { Gavel, Fingerprint } from 'phosphor-react-native';
+import { useI18n } from '@/context/I18nContext';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
@@ -19,6 +20,8 @@ export default function LoginScreen() {
   
   const auth = useContext(AuthContext);
   const router = useRouter();
+  const { t, locale } = useI18n();
+  const isRTL = locale === 'ar';
 
   if (!auth) return null;
 
@@ -54,17 +57,17 @@ export default function LoginScreen() {
                 <Gavel size={40} color="white" weight="fill" />
               </StyledView>
               <StyledText className="text-3xl font-bold text-midnight uppercase tracking-[4] font-serif text-center">
-                Mizan
+                {t('login_title')}
               </StyledText>
               <StyledText className="text-midnight/40 italic mt-2 font-serif text-center">
-                Access your dossiers
+                {t('login_subtitle')}
               </StyledText>
             </StyledView>
 
             <StyledView className="space-y-6">
               <StyledView>
-                <StyledText className="text-[10px] font-bold text-midnight/40 uppercase tracking-[2] mb-2 ml-1 font-sans">
-                  Phone Number
+                <StyledText className={`text-[10px] font-bold text-midnight/40 uppercase tracking-[2] mb-2 ml-1 font-sans ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('phone_number')}
                 </StyledText>
                 <StyledTextInput
                   placeholder="06..."
@@ -77,8 +80,8 @@ export default function LoginScreen() {
               </StyledView>
 
               <StyledView className="mt-4">
-                <StyledText className="text-[10px] font-bold text-midnight/40 uppercase tracking-[2] mb-2 ml-1 font-sans">
-                  Password
+                <StyledText className={`text-[10px] font-bold text-midnight/40 uppercase tracking-[2] mb-2 ml-1 font-sans ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('password')}
                 </StyledText>
                 <StyledTextInput
                   placeholder="••••••••"
@@ -99,12 +102,12 @@ export default function LoginScreen() {
               <StyledView className="flex-row justify-between mt-4 px-1">
                 <StyledTouchableOpacity>
                   <StyledText className="text-midnight/40 text-[10px] font-bold uppercase tracking-[1] font-sans">
-                    Forgot Password?
+                    {t('forgot_password')}
                   </StyledText>
                 </StyledTouchableOpacity>
                 <StyledTouchableOpacity>
                   <StyledText className="text-midnight/40 text-[10px] font-bold uppercase tracking-[1] font-sans">
-                    System Help
+                    {t('system_help')}
                   </StyledText>
                 </StyledTouchableOpacity>
               </StyledView>
@@ -123,20 +126,20 @@ export default function LoginScreen() {
                 <ActivityIndicator color="white" />
               ) : (
                 <>
-                  <Fingerprint size={20} color="white" weight="bold" className="mr-2" />
+                  <Fingerprint size={20} color="white" weight="bold" style={{ marginRight: 8 }} />
                   <StyledText className="text-white font-bold uppercase tracking-[4] ml-2 font-sans">
-                    Identify Self
+                    {t('identify_self')}
                   </StyledText>
                 </>
               )}
             </StyledTouchableOpacity>
 
             <StyledView className="flex-row justify-center mt-8">
-              <StyledText className="text-midnight/50 font-serif">New claimant? </StyledText>
+              <StyledText className="text-midnight/50 font-serif">{t('new_claimant')} </StyledText>
               <Link href="/(auth)/register" asChild>
                 <StyledTouchableOpacity>
                   <StyledText className="text-wax font-bold uppercase tracking-[2] text-xs font-sans">
-                    Register Here
+                    {t('register_here')}
                   </StyledText>
                 </StyledTouchableOpacity>
               </Link>

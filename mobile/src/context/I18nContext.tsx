@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import * as SecureStore from 'expo-secure-store';
+import * as storage from '../shared/utils/storage';
 import { translations, Language, TranslationKey } from '../constants/translations';
 
 const LOCALE_KEY = 'MIZAN_LOCALE';
@@ -14,28 +14,22 @@ interface I18nContextType {
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
 export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [locale, setLocale] = useState<Language | null>(null);
-  const [isReady, setIsReady] = useState(false);
+  // Lock to Darija ('ar') as requested
+  const [locale, setLocale] = useState<Language>('ar');
+  const [isReady, setIsReady] = useState(true);
 
+  // Still keep storage in case we want to re-enable, but force 'ar' for now
   useEffect(() => {
-    async function loadLocale() {
-      const savedLocale = await SecureStore.getItemAsync(LOCALE_KEY);
-      if (savedLocale === 'en' || savedLocale === 'ar') {
-        setLocale(savedLocale as Language);
-      }
-      setIsReady(true);
-    }
-    loadLocale();
+    storage.setItemAsync(LOCALE_KEY, 'ar');
   }, []);
 
   const setLanguage = async (lang: Language) => {
-    await SecureStore.setItemAsync(LOCALE_KEY, lang);
-    setLocale(lang);
+    // No-op to prevent switching away from Darija
+    console.log("Language switching is disabled, locked to Darija.");
   };
 
   const t = (key: TranslationKey): string => {
-    if (!locale) return translations.en[key];
-    return translations[locale][key] || translations.en[key];
+    return translations.ar[key] || translations.en[key];
   };
 
   return (

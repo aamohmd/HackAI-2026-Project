@@ -8,6 +8,12 @@ import 'react-native-reanimated';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider, AuthContext } from '../src/context/AuthContext';
 import { I18nProvider } from '../src/context/I18nContext';
+import { Platform } from 'react-native';
+import { NativeWindStyleSheet } from 'nativewind';
+
+NativeWindStyleSheet.setOutput({
+  default: Platform.OS === 'web' ? 'native' : 'native',
+});
 
 import {
   CrimsonText_400Regular,

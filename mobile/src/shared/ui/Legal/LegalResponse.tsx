@@ -1,12 +1,13 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
 import { styled } from 'nativewind';
-import { Scales, WarningCircle } from 'phosphor-react-native';
+import { Scales, WarningCircle, SpeakerHigh, Pause } from 'phosphor-react-native';
 import { ConfidenceBadge } from './ConfidenceBadge';
 import { CitationItem, Citation } from './CitationItem';
 
 const StyledView = styled(View);
 const StyledText = styled(Text);
+const StyledPressable = styled(Pressable);
 
 interface Props {
   answer: string;
@@ -14,6 +15,10 @@ interface Props {
   confidence: number;
   recommendLawyer: boolean;
   register?: 'simple' | 'standard' | 'technical';
+  audioUrl?: string;
+  onPlayAudio?: (url: string) => void;
+  isPlayingAudio?: boolean;
+  onTogglePlayback?: () => void;
 }
 
 /**
@@ -25,7 +30,11 @@ export const LegalResponse: React.FC<Props> = ({
   citations, 
   confidence, 
   recommendLawyer,
-  register = 'standard'
+  register = 'standard',
+  audioUrl,
+  onPlayAudio,
+  isPlayingAudio = false,
+  onTogglePlayback
 }) => {
   return (
     <StyledView className="bg-parchment-50 border-2 border-midnight/5 p-6 shadow-sm">
@@ -37,7 +46,27 @@ export const LegalResponse: React.FC<Props> = ({
             Legal Guidance
           </StyledText>
         </StyledView>
-        <ConfidenceBadge score={confidence} />
+        
+        <StyledView className="flex-row items-center gap-3">
+          {audioUrl && onPlayAudio && (
+            <StyledPressable 
+              onPress={() => {
+                isPlayingAudio && onTogglePlayback ? onTogglePlayback() : onPlayAudio(audioUrl);
+              }}
+              className="flex-row items-center gap-1.5 bg-wax/10 border border-wax/20 px-3 py-1.5 rounded-full active:opacity-75"
+            >
+              {isPlayingAudio ? (
+                <Pause size={14} color="#9A3412" weight="fill" />
+              ) : (
+                <SpeakerHigh size={14} color="#9A3412" weight="fill" />
+              )}
+              <StyledText className="text-wax text-[10px] font-sans font-bold uppercase tracking-wider">
+                {isPlayingAudio ? "Pause" : "Listen (Darija)"}
+              </StyledText>
+            </StyledPressable>
+          )}
+          <ConfidenceBadge score={confidence} />
+        </StyledView>
       </StyledView>
 
       {/* The Answer in Darija */}

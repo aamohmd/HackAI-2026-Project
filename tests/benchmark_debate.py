@@ -2,8 +2,8 @@ import os
 import time
 import json
 import logging
-from api.schemas import Chunk, UserProfile
-from api.agent.debate.loop import DebateLoop
+from backend.schemas import Chunk, UserProfile
+from backend.agent.debate.loop import DebateLoop
 
 logging.basicConfig(level=logging.WARNING)
 

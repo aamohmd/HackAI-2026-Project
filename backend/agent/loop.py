@@ -1,7 +1,7 @@
 import asyncio
 import base64
 from typing import AsyncGenerator
-from backend.types import FinalAnswer, UserProfile, Citation
+from backend.schemas import FinalAnswer, UserProfile, Citation
 from backend.speech.stt import transcribe
 from backend.agent.classifier import classify_intent
 from backend.agent.clarifier import generate_clarifying_question

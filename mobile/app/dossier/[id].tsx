@@ -1,9 +1,12 @@
+import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Text, ActivityIndicator, Share, TouchableOpacity } from 'react-native';
 import { useLocalSearchParams, Stack } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { styled } from 'nativewind';
 import { Export } from 'phosphor-react-native';
 import { dossiersApi, DossierEntry } from '@/features/intake/api/dossiers';
+import { Audio } from 'expo-av';
+import api from '@/shared/api/client';
 
 import { LegalResponse, TripleArtifactHUD } from '@/shared/ui/Legal';
 import { MotabaqStamp } from '@/shared/ui/Stamps';
@@ -17,6 +20,73 @@ export default function DossierDetailScreen() {
   const insets = useSafeAreaInsets();
   const [dossier, setDossier] = useState<DossierEntry | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Audio Playback State
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playingUrl, setPlayingUrl] = useState<string | null>(null);
+
+  // Clean up sound on unmount
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
+
+  const playAudio = async (urlPath: string) => {
+    try {
+      if (sound) {
+        await sound.unloadAsync();
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldRouteThroughEarpieceIOS: false,
+      });
+
+      const fullUrl = `${api.defaults.baseURL}${urlPath}`;
+      console.log("Playing audio from:", fullUrl);
+
+      const { sound: newSound } = await Audio.Sound.createAsync(
+        { uri: fullUrl },
+        { shouldPlay: true }
+      );
+
+      setSound(newSound);
+      setIsPlaying(true);
+      setPlayingUrl(urlPath);
+
+      newSound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded) {
+          setIsPlaying(status.isPlaying);
+          if (status.didJustFinish) {
+            setIsPlaying(false);
+          }
+        }
+      });
+    } catch (error) {
+      console.error("Error playing sound:", error);
+    }
+  };
+
+  const togglePlayback = async () => {
+    if (!sound) return;
+    try {
+      if (isPlaying) {
+        await sound.pauseAsync();
+        setIsPlaying(false);
+      } else {
+        await sound.playAsync();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error("Error toggling playback:", error);
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -101,6 +171,10 @@ export default function DossierDetailScreen() {
               confidence={state.mizan_result.confidence}
               recommendLawyer={state.mizan_result.recommend_lawyer}
               register={state.mizan_result.answer_register}
+              audioUrl={state.mizan_result.audio_url}
+              onPlayAudio={playAudio}
+              isPlayingAudio={isPlaying && playingUrl === state.mizan_result.audio_url}
+              onTogglePlayback={togglePlayback}
             />
           </StyledView>
         ) : (

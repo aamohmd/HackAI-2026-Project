@@ -26,23 +26,11 @@ export default function WelcomeScreen() {
   const insets = useSafeAreaInsets();
   const { locale, t, isReady } = useI18n();
 
-  if (!isReady) return null;
-
-  if (!locale) {
-    return <LanguageGateway />;
-  }
-
-  const isRTL = locale === 'ar';
+  const isRTL = true; // Forced for Darija
 
   return (
     <StyledView className="flex-1 bg-parchment-100">
-      {/* Language Toggle in top right */}
-      <StyledView 
-        className="absolute z-10" 
-        style={{ top: insets.top + 10, right: 20 }}
-      >
-        <LanguageToggle />
-      </StyledView>
+      {/* Language Toggle removed for Darija-only mode */}
 
       <StyledView 
         className="flex-1 px-8 justify-center items-center"

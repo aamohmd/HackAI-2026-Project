@@ -1,4 +1,4 @@
-from backend.types import FinalAnswer, UserProfile
+from backend.schemas import FinalAnswer, UserProfile
 
 TRIBUNAL_MAP = {
     "casablanca": "المحكمة الابتدائية بالدار البيضاء - شارع الحسن الثاني",

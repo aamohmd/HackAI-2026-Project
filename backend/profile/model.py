@@ -2,7 +2,7 @@ import sqlite3
 import json
 from typing import Optional
 import os
-from backend.types import UserProfile
+from backend.schemas import UserProfile
 
 DB_PATH = os.environ.get("SQLITE_DB_PATH", "mizan.db")
 

@@ -32,7 +32,7 @@ class ClassificationResult(BaseModel):
 def classify_intent(transcript: str) -> ClassificationResult:
     prompt = f"""
     You are an intent classifier for Mizan, a Moroccan legal AI.
-    Analyze the user's transcript and classify the intent.
+    The user's transcript is in Moroccan Darija. Analyze and classify the intent.
     Transcript: {transcript}
     """
     

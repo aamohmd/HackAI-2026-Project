@@ -22,7 +22,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   return (
     <StyledView 
       className={`bg-midnight/5 overflow-hidden ${className}`}
-      style={{ width, height, borderRadius }}
+      style={{ width: width as any, height: height as any, borderRadius }}
     >
       <StyledMotiView
         from={{ translateX: -width as any }}

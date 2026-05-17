@@ -2,9 +2,9 @@ import os
 import unittest
 from unittest.mock import patch, MagicMock
 
-from api.schemas import Chunk, UserProfile, FinalAnswer
-from api.agent.debate.loop import DebateLoop
-from api.agent.debate.primary import call_primary_agent
+from backend.schemas import Chunk, UserProfile, FinalAnswer
+from backend.agent.debate.loop import DebateLoop
+from backend.agent.debate.primary import call_primary_agent
 
 class TestDebateLoop(unittest.TestCase):
     def setUp(self):
@@ -20,9 +20,9 @@ class TestDebateLoop(unittest.TestCase):
             )
         ]
 
-    @patch('api.agent.debate.loop.call_synthesis_agent')
-    @patch('api.agent.debate.loop.call_devils_advocate')
-    @patch('api.agent.debate.loop.call_primary_agent')
+    @patch('backend.agent.debate.loop.call_synthesis_agent')
+    @patch('backend.agent.debate.loop.call_devils_advocate')
+    @patch('backend.agent.debate.loop.call_primary_agent')
     def test_loop_execution_order(self, mock_primary, mock_devil, mock_synthesis):
         # Setup mocks
         mock_primary.return_value = MagicMock(answer_darija="Mock primary answer")

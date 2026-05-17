@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import * as storage from '../utils/storage';
 import Constants from 'expo-constants';
 
 const TOKEN_KEY = 'access_token';
@@ -9,15 +9,15 @@ let accessToken: string | null = null;
 export const setAccessToken = async (token: string | null) => {
   accessToken = token;
   if (token) {
-    await SecureStore.setItemAsync(TOKEN_KEY, token);
+    await storage.setItemAsync(TOKEN_KEY, token);
   } else {
-    await SecureStore.deleteItemAsync(TOKEN_KEY);
+    await storage.deleteItemAsync(TOKEN_KEY);
   }
 };
 
 export const getAccessToken = async () => {
   if (!accessToken) {
-    accessToken = await SecureStore.getItemAsync(TOKEN_KEY);
+    accessToken = await storage.getItemAsync(TOKEN_KEY);
   }
   return accessToken;
 };

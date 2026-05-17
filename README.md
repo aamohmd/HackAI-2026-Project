@@ -25,7 +25,7 @@ Every component runs on free tiers or locally on Apple Silicon. No billing requi
 | Mobile | React Native + Expo | Free | Single codebase, Arabic RTL, fast iteration |
 | Backend | FastAPI + Uvicorn | Free | Async WebSocket, lightweight |
 | Orchestration | Plain Python state machine | Free | Debuggable, no framework lock-in |
-| LLM | Gemini 2.0 Flash | Free (1M tokens/day) | Function calling, fast, strong Arabic reasoning |
+| LLM | Llama 3.3 (via Groq) | Free | High-speed inference, function calling, strong logic |
 | Embeddings | Cohere Embed v3 multilingual | Free (trial key, no card) | Darija code-switching, handles variant spellings |
 | Reranker | Cohere Rerank multilingual v3 | Free (same key) | Arabic-native, no local model needed |
 | Vector store | ChromaDB (file-based) | Free | Zero infra, persists to disk |
@@ -40,7 +40,7 @@ Every component runs on free tiers or locally on Apple Silicon. No billing requi
 
 ### Get your free keys
 
-- **Gemini:** https://aistudio.google.com/app/apikey — no billing, no credit card
+- **Llama 3.3:** https://aistudio.google.com/app/apikey — no billing, no credit card
 - **Cohere:** https://dashboard.cohere.com — trial key gives embeddings + rerank free
 
 ---
@@ -77,7 +77,7 @@ Every component runs on free tiers or locally on Apple Silicon. No billing requi
 │                            │ Darija transcript                    │
 │                            ▼                                      │
 │  ┌──────────────────────────────────────────────────────────┐    │
-│  │  Step 1 — Intent classifier  (Gemini function call #1)   │    │
+│  │  Step 1 — Intent classifier  (Llama 3.3 function call #1)   │    │
 │  │    → domain · intent · confidence · missing_context      │    │
 │  │    → if confidence < 0.7: generate clarifying question   │    │
 │  └─────────────────────────┬────────────────────────────────┘    │
@@ -92,17 +92,17 @@ Every component runs on free tiers or locally on Apple Silicon. No billing requi
 │  ┌──────────────────────────────────────────────────────────┐    │
 │  │  Step 3 — Multi-agent confidence debate  ★               │    │
 │  │                                                          │    │
-│  │  Call A — Primary agent  (Gemini function call #2)       │    │
+│  │  Call A — Primary agent  (Llama 3.3 function call #2)       │    │
 │  │    Tool: submit_legal_answer                             │    │
 │  │    Output: answer_darija · citations[] · confidence      │    │
 │  │                     │                                    │    │
 │  │                     ▼                                    │    │
-│  │  Call B — Devil's advocate  (Gemini function call #3)    │    │
+│  │  Call B — Devil's advocate  (Llama 3.3 function call #3)    │    │
 │  │    Tool: score_claims                                    │    │
 │  │    Output: grounded | hedged | not_in_context per claim  │    │
 │  │                     │                                    │    │
 │  │                     ▼                                    │    │
-│  │  Call C — Synthesis agent  (Gemini function call #4)     │    │
+│  │  Call C — Synthesis agent  (Llama 3.3 function call #4)     │    │
 │  │    Removes not_in_context claims                         │    │
 │  │    Softens hedged claims → final confidence score        │    │
 │  └─────────────────────────┬────────────────────────────────┘    │
@@ -129,7 +129,7 @@ Every component runs on free tiers or locally on Apple Silicon. No billing requi
          │                    │                     │
          ▼                    ▼                     ▼
   ┌─────────────┐    ┌──────────────┐    ┌───────────────┐
-  │  Gemini API │    │   ChromaDB   │    │    SQLite     │
+  │  Llama 3.3 API │    │   ChromaDB   │    │    SQLite     │
   │ (4 calls    │    │ (namespaced, │    │ sessions,     │
   │  per query) │    │  file-based) │    │ review queue, │
   └─────────────┘    └──────────────┘    │ offline cache │
@@ -140,7 +140,7 @@ Every component runs on free tiers or locally on Apple Silicon. No billing requi
 
 ## Connectivity Tiers — Rural Reliability
 
-Mizan degrades gracefully instead of failing silently. Connectivity is checked before every Gemini call.
+Mizan degrades gracefully instead of failing silently. Connectivity is checked before every Llama 3.3 call.
 
 ```python
 import time
@@ -158,15 +158,15 @@ def check_connectivity() -> str:
 
 | Result | Pipeline behaviour |
 |---|---|
-| `fast` | Full pipeline — Whisper → Gemini (4 calls) → edge-tts → voice answer |
-| `slow` | Whisper → Gemini → text answer (TTS skipped to save round-trip) |
+| `fast` | Full pipeline — Whisper → Llama 3.3 (4 calls) → edge-tts → voice answer |
+| `slow` | Whisper → Llama 3.3 → text answer (TTS skipped to save round-trip) |
 | `offline` | RapidFuzz fuzzy match against SQLite cache → "محفوظ" badge |
 
 ---
 
 ## The Three AI Innovations — Deep Dive
 
-### 1. Gemini function calling as a hard architectural constraint
+### 1. Llama 3.3 function calling as a hard architectural constraint
 
 The answer generator does not write free text. It is required to call a function:
 
@@ -217,7 +217,7 @@ The same pattern applies to the devil's advocate (`score_claims`) and the synthe
 ```python
 import google.generativeai as genai
 
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+genai.configure(api_key=os.environ["GROQ_API_KEY"])
 model = genai.GenerativeModel("gemini-2.0-flash")
 
 class DebateLoop:
@@ -478,16 +478,16 @@ Metadata per chunk:
 ### Running ingestion
 
 ```bash
-python scripts/chunk_and_embed.py --domain family_law
-python scripts/chunk_and_embed.py --domain land
-python scripts/chunk_and_embed.py --domain labour
-python scripts/chunk_and_embed.py --domain civil_debt
+python scripts/ingest_legal_data.py --domain family_law
+python scripts/ingest_legal_data.py --domain land
+python scripts/ingest_legal_data.py --domain labour
+python scripts/ingest_legal_data.py --domain civil_debt
 
 # Or all at once
-python scripts/chunk_and_embed.py --all
+python scripts/ingest_legal_data.py --all
 
 # Verify counts
-python scripts/chunk_and_embed.py --stats
+python scripts/ingest_legal_data.py --stats
 ```
 
 ---
@@ -497,122 +497,86 @@ python scripts/chunk_and_embed.py --stats
 ```
 mizan/
 ├── backend/
-│   ├── main.py                     # FastAPI app, WebSocket endpoint
+│   ├── main.py                     # FastAPI app, REST + WebSocket
+│   ├── database.py                 # SQLAlchemy engine and session
+│   ├── schemas.py                  # Pydantic models for all components
+│   ├── models/                     # SQLAlchemy models (User, Dossier, etc.)
+│   ├── routes/                     # API endpoints (Auth, Intake, Dossiers)
 │   ├── agent/
-│   │   ├── loop.py                 # Orchestration (plain Python state machine)
-│   │   ├── classifier.py           # Step 1: domain + intent (Gemini function call)
-│   │   ├── retriever.py            # Step 2: BM25 + Cohere Embed + Cohere Rerank
-│   │   ├── clarifier.py            # Confidence gate + Darija follow-up question
-│   │   ├── debate/
-│   │   │   ├── primary.py          # Call A: answer drafter
-│   │   │   ├── devil.py            # Call B: claim scorer
-│   │   │   └── synthesis.py        # Call C: final answer + confidence
-│   │   ├── formatter.py            # Literacy-aware register adapter
-│   │   └── feedback.py             # Update user mental model from thumbs signal
-│   ├── tools/
-│   │   ├── answer_tool.py          # submit_legal_answer schema
-│   │   ├── score_tool.py           # score_claims schema
-│   │   └── synthesis_tool.py       # submit_synthesis schema
+│   │   ├── loop.py                 # Outer orchestration (STT -> Intent -> Debate)
+│   │   ├── classifier.py           # Intent classification (Llama 3.3)
+│   │   ├── formatter.py            # Literacy-aware register adaptation
+│   │   └── debate/
+│   │       ├── primary.py          # Primary agent drafter
+│   │       ├── devil.py            # Devil's advocate scorer
+│   │       └── synthesis.py        # Final synthesis agent
 │   ├── knowledge/
-│   │   ├── ingest.py               # Article-level chunking pipeline
-│   │   ├── domains/
-│   │   │   ├── family_law/         # Moudawana 2004 + 2025 amendments
-│   │   │   ├── land/               # Dahir Foncier 1913, Collective Land, Habous
-│   │   │   ├── labour/             # Code du Travail Law 65-99, CNSS
-│   │   │   └── civil_debt/         # Code des Obligations et Contrats
-│   │   └── embedder.py             # Cohere Embed v3 multilingual wrapper
+│   │   ├── ingest.py               # Document chunking pipeline
+│   │   ├── retriever.py            # Hybrid BM25 + Vector search
+│   │   └── vector_store.py         # ChromaDB integration
 │   ├── speech/
-│   │   ├── stt.py                  # Whisper medium via mlx-whisper (local, M4)
-│   │   └── tts.py                  # edge-tts ar-MA-JamalNeural (streamed)
-│   ├── profile/
-│   │   ├── model.py                # UserProfile dataclass + SQLite persistence
-│   │   └── review_queue.py         # Low-confidence answers → pro-bono queue
-│   ├── cache/
-│   │   └── offline_cache.py        # SQLite + RapidFuzz fuzzy match fallback
-│   └── prompts/
-│       ├── system_primary.txt
-│       ├── system_devil.txt
-│       └── system_synthesis.txt
+│   │   ├── stt.py                  # Whisper medium (mlx-whisper)
+│   │   └── tts.py                  # edge-tts streaming
+│   └── profile/
+│       └── model.py                # UserProfile persistence (SQLite)
 ├── mobile/
-│   ├── App.tsx
-│   ├── screens/
-│   │   ├── HomeScreen.tsx          # Mic button, waveform animation
-│   │   ├── DebatingScreen.tsx      # "Two AI agents are reviewing…" animation
-│   │   └── AnswerScreen.tsx        # Answer + confidence badge + source collapsible
-│   └── services/
-│       ├── audio.ts                # Opus encode, WebSocket stream
-│       ├── cache.ts                # SQLite offline cache
-│       └── profile.ts              # Local user mental model sync
+│   ├── App.tsx                     # Main entry
+│   ├── src/
+│   │   ├── features/               # Auth, Intake, Dossier features
+│   │   └── shared/                 # API client, components
 ├── scripts/
-│   ├── scrape_moudawana.py
-│   ├── scrape_code_travail.py
-│   └── chunk_and_embed.py
+│   └── ingest_legal_data.py        # CLI for knowledge base ingestion
 ├── tests/
-│   ├── test_retrieval.py           # Precision@5 per domain (target ≥ 0.75)
-│   ├── test_debate_loop.py         # Devil's advocate correctly flags hallucinated claims
-│   ├── test_tool_schemas.py        # Gemini always calls the function, never free text
-│   ├── test_register_adapter.py    # Formatter matches correct register per score
-│   └── test_agent_loop.py          # 20 end-to-end scripted conversations
+│   ├── test_debate_loop.py         # Testing the agentic logic
+│   └── test_user_routes.py         # Testing API endpoints
 ├── .env.example
-└── README.md
+├── Dockerfile
+└── docker-compose.yaml
 ```
 
 ---
 
-## Setup
+## Setup & Installation
 
-### Prerequisites
+Mizan is optimized for **Native Execution** to leverage MacBook M4 hardware acceleration for voice tasks.
 
-- Python 3.11+
-- Node.js 20+
-- MacBook M4 (or any machine with internet access — M4 is required only for local Whisper)
-- Gemini API key (free — https://aistudio.google.com/app/apikey)
-- Cohere API key (free — https://dashboard.cohere.com)
+### 1. Prerequisites
+- **Python 3.11+**
+- **Node.js 20+** (npm)
+- **API Keys**: Groq, Cohere, and Google (see `.env.example`)
 
-### Install
-
-```bash
-pip install fastapi uvicorn websockets google-generativeai cohere \
-            chromadb rank-bm25 rapidfuzz sqlalchemy requests \
-            mlx-whisper edge-tts
-```
-
-### Environment variables
+### 2. Quick Start
+Use the provided `Makefile` for a streamlined setup:
 
 ```bash
-cp .env.example .env
+# Install all dependencies
+make setup
+
+# Run both Backend & Mobile
+make dev
 ```
 
+### 3. Manual Startup
+If you prefer separate terminals:
+
+**Backend (FastAPI):**
 ```bash
-# Required — both free, no credit card
-GEMINI_API_KEY=
-COHERE_API_KEY=
-
-# Debate loop tuning
-DEBATE_CONFIDENCE_THRESHOLD=0.65
-DEBATE_LAWYER_CAP=0.60       # confidence cap when any claim was not_in_context
-
-# Whisper model — downloaded once on first run
-WHISPER_MODEL=mlx-community/whisper-medium-mlx
+python3 -m backend.main
 ```
 
-### Start backend
-
-```bash
-# First run: ingest knowledge base (~15 min, one time)
-python scripts/chunk_and_embed.py --all
-
-# Start server
-uvicorn backend.main:app --reload --port 8000
-```
-
-### Start mobile
-
+**Mobile (Expo):**
 ```bash
 cd mobile
-npm install
 npx expo start
 ```
+
+---
+
+## 🛠️ Development Tools
+- `make clean`: Removes caches and local database.
+- `make clean-ports`: Force-kills processes on common dev ports (8000, 8081).
+- `make backend`: Runs only the API.
+- `make mobile`: Runs only the Expo server.
 
 ---
 
@@ -625,7 +589,7 @@ python tests/test_retrieval.py --domain family_law
 # Debate loop — injects known hallucinated claims, verifies they are removed
 python tests/test_debate_loop.py
 
-# Tool compliance — Gemini must always call the function, never produce free text
+# Tool compliance — Llama 3.3 must always call the function, never produce free text
 python tests/test_tool_schemas.py
 
 # Register adaptation — verifies simpler output for literacy_score < 0.35
@@ -643,7 +607,7 @@ python tests/test_agent_loop.py
 |-----------|-----------|
 | Darija orthography is not standardised | Character-level normalisation at ingestion; Cohere Embed handles variant spellings acceptably |
 | Legal text is in MSA Arabic and French | French texts translated to Arabic at ingestion; MSA-heavy answers flagged for review |
-| Gemini free tier: 15 req/min | Sufficient for demo and small-scale use; rate-limit error returns cached answer if available |
+| Llama 3.3 free tier: 15 req/min | Sufficient for demo and small-scale use; rate-limit error returns cached answer if available |
 | TTS requires connectivity | Text always shown alongside audio; offline mode returns text only |
 | No real lawyer validation yet | Answers with confidence < 0.6 pushed to async SQLite review queue for partnered pro-bono lawyers |
 | 2025 Moudawana reform still proposed | Chunks labelled `status: proposed`; answers using them carry "هاد القانون ما زال مشروع" warning |
@@ -665,7 +629,7 @@ Show a question where the devil's advocate flags one claim as `not_in_context`. 
 Ask the same question with two profiles: rural farmer (literacy 0.2, Khénifra) and Casablanca paralegal (literacy 0.8). Show the judge two completely different answers — different vocabulary, different sentence structure, different use of article numbers. Then show a 🟡 0.51 confidence answer with the "نصحك تمشي للمحامي" banner. Say: *"The system knows what it doesn't know. That's rare in AI products, and in a legal context it matters enormously."*
 
 **Target demo metrics:**
-- Latency: < 8 seconds end-to-end on 4G (4s Whisper + ~3s Gemini × 4 calls)
+- Latency: < 8 seconds end-to-end on 4G (4s Whisper + ~3s Llama 3.3 × 4 calls)
 - Retrieval Precision@5: ≥ 0.75 on labeled test set
 - Citation accuracy: 100% — architecturally impossible to hallucinate citations not in retrieved chunks
 - Debate loop false-negative rate: < 10%
@@ -686,11 +650,11 @@ Before anyone writes a single function, spend **30 minutes writing `backend/type
 
 | Task | Description | Est. |
 |------|-------------|------|
-| Function schemas | Write and validate all three schemas: `submit_legal_answer`, `score_claims`, `submit_synthesis`. Add a test confirming Gemini always calls the function and never emits free text — run this before touching anything else. | 1.5 h |
+| Function schemas | Write and validate all three schemas: `submit_legal_answer`, `score_claims`, `submit_synthesis`. Add a test confirming Llama 3.3 always calls the function and never emits free text — run this before touching anything else. | 1.5 h |
 | System prompts | Write and iterate the three prompts: primary agent in Darija, devil's advocate in English, synthesis mixing both. Tune devil's advocate strictness until the flag rate on test questions is realistic — not 0%, not 80%. | 1.5 h |
-| Primary agent | `debate/primary.py` — Gemini function call #2. Accepts `transcript + chunks + literacy_score`, returns `PrimaryAnswer`. | 1 h |
-| Devil's advocate | `debate/devil.py` — Gemini function call #3. Receives primary answer + raw chunks. Be strict: `grounded` means word-for-word traceable only. | 1.5 h |
-| Synthesis agent | `debate/synthesis.py` — Gemini function call #4. Deletes `not_in_context` claims, softens `hedged` ones, computes confidence and `recommend_lawyer`. | 1 h |
+| Primary agent | `debate/primary.py` — Llama 3.3 function call #2. Accepts `transcript + chunks + literacy_score`, returns `PrimaryAnswer`. | 1 h |
+| Devil's advocate | `debate/devil.py` — Llama 3.3 function call #3. Receives primary answer + raw chunks. Be strict: `grounded` means word-for-word traceable only. | 1.5 h |
+| Synthesis agent | `debate/synthesis.py` — Llama 3.3 function call #4. Deletes `not_in_context` claims, softens `hedged` ones, computes confidence and `recommend_lawyer`. | 1 h |
 | Debate orchestrator | `debate/loop.py` — wires calls A → B → C, handles retries if a function call fails, returns `FinalAnswer`. | 0.5 h |
 
 **Total: ~7 h**
@@ -723,7 +687,7 @@ Before anyone writes a single function, spend **30 minutes writing `backend/type
 | FastAPI server | `main.py` — WebSocket endpoint, startup events (load BM25, warm ChromaDB), error handling, CORS. Write this first — App Dev needs something to connect to. | 1.5 h |
 | STT adapter | `speech/stt.py` — mlx-whisper wrapper. Accepts audio binary, emits Darija transcript. | 1 h |
 | TTS adapter | `speech/tts.py` — edge-tts `ar-MA-JamalNeural`. Stream first sentence back before full answer is assembled. Degrade to text if offline. | 1 h |
-| Intent classifier | `classifier.py` — Gemini function call #1. Outputs `domain`, `intent`, `confidence`, `missing_context`. | 1 h |
+| Intent classifier | `classifier.py` — Llama 3.3 function call #1. Outputs `domain`, `intent`, `confidence`, `missing_context`. | 1 h |
 | Clarifier | `clarifier.py` — if `confidence < 0.7`, generate a Darija follow-up question, wait for second input, re-run classifier with enriched context. | 0.5 h |
 | Main agent loop | `loop.py` — state machine: transcript → classify → maybe_clarify → retrieve → debate → format → TTS → send `FinalAnswer` over WebSocket. | 1 h |
 | Answer formatter | `formatter.py` — reads `user.literacy_score`, maps to register, adjusts Darija sentence complexity and article number prominence. | 1 h |
