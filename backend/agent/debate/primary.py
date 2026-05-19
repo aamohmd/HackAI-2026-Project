@@ -17,7 +17,6 @@ def call_primary_agent(transcript: str, chunks: list[Chunk]) -> PrimaryAnswer:
         ],
         tools=[{"type": "function", "function": ANSWER_TOOL}],
         tool_choice={"type": "function", "function": {"name": "submit_legal_answer"}},
-        temperature=0.1,
     )
 
     tc = response.choices[0].message.tool_calls[0]

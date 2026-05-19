@@ -248,7 +248,6 @@ async def _call_openai(
         ],
         tools=[{"type": "function", "function": tool}],
         tool_choice={"type": "function", "function": {"name": tool_name}},
-        temperature=0.1,   # low temp for deterministic legal answers
     )
 
     msg = response.choices[0].message

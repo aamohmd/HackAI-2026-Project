@@ -17,7 +17,6 @@ def call_devils_advocate(answer: str, chunks: list[Chunk]) -> ClaimScores:
         ],
         tools=[{"type": "function", "function": SCORE_CLAIMS_TOOL}],
         tool_choice={"type": "function", "function": {"name": "score_claims"}},
-        temperature=0,   # strict deterministic fact-checking
     )
 
     tc = response.choices[0].message.tool_calls[0]

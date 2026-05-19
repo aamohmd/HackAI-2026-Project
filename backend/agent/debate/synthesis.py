@@ -20,7 +20,6 @@ def call_synthesis_agent(primary: PrimaryAnswer, scores: ClaimScores) -> FinalAn
         ],
         tools=[{"type": "function", "function": SYNTHESIS_TOOL}],
         tool_choice={"type": "function", "function": {"name": "submit_synthesis"}},
-        temperature=0.1,
     )
 
     tc = response.choices[0].message.tool_calls[0]
