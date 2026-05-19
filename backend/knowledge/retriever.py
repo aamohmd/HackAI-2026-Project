@@ -6,7 +6,7 @@ from backend.knowledge.vector_store import VectorStore
 from backend.knowledge.types import Chunk
 
 BM25_INDEX_DIR = os.path.join("backend", "knowledge", "indices")
-RERANKER_MODEL = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+RERANKER_MODEL = "BAAI/bge-reranker-large"
 
 # Lazy singleton — loaded once on first retrieve() call
 _reranker = None
@@ -73,39 +73,52 @@ class HybridRetriever:
                 if bm25_scores[idx] > 0:
                     bm25_results.append(self.chunks_map[domain][idx])
         
-        # 3. Combine and Deduplicate
-        seen_ids = set()
-        combined_candidates = []
-        
-        # Add vector results
+        # 3. Reciprocal Rank Fusion (RRF) candidate merging
+        vector_chunks = []
         for res in vector_results:
-            if res["id"] not in seen_ids:
-                # Convert back to Chunk
-                meta = res["metadata"]
-                # Reconstruct internal metadata if any
-                internal_meta = {}
-                for k, v in list(meta.items()):
-                    if k.startswith("meta_"):
-                        internal_meta[k[5:]] = v
-                        del meta[k]
-                
-                combined_candidates.append(Chunk(
-                    id=res["id"],
-                    text=res["text"],
-                    article_number=meta["article_number"],
-                    law_name=meta["law_name"],
-                    law_code=meta["law_code"],
-                    domain=meta["domain"],
-                    metadata=internal_meta
-                ))
-                seen_ids.add(res["id"])
-                
-        # Add BM25 results
+            meta = res["metadata"]
+            internal_meta = {}
+            for k, v in list(meta.items()):
+                if k.startswith("meta_"):
+                    internal_meta[k[5:]] = v
+                    del meta[k]
+            vector_chunks.append(Chunk(
+                id=res["id"],
+                text=res["text"],
+                article_number=meta["article_number"],
+                law_name=meta["law_name"],
+                law_code=meta["law_code"],
+                domain=meta["domain"],
+                metadata=internal_meta
+            ))
+
+        bm25_chunks = []
         for chunk in bm25_results:
-            if chunk.id not in seen_ids:
-                combined_candidates.append(chunk)
-                seen_ids.add(chunk.id)
-                
+            if isinstance(chunk, dict):
+                bm25_chunks.append(Chunk(
+                    id=chunk.get("id"),
+                    text=chunk.get("text"),
+                    article_number=chunk.get("article_number"),
+                    law_name=chunk.get("law_name"),
+                    law_code=chunk.get("law_code"),
+                    domain=chunk.get("domain"),
+                    metadata=chunk.get("metadata", {})
+                ))
+            else:
+                bm25_chunks.append(chunk)
+
+        # RRF Calculation
+        k = 60
+        rrf_scores = {}
+        for rank, chunk in enumerate(vector_chunks):
+            rrf_scores[chunk.id] = rrf_scores.get(chunk.id, 0.0) + 1.0 / (k + rank + 1)
+        for rank, chunk in enumerate(bm25_chunks):
+            rrf_scores[chunk.id] = rrf_scores.get(chunk.id, 0.0) + 1.0 / (k + rank + 1)
+
+        chunk_map = {c.id: c for c in vector_chunks + bm25_chunks}
+        sorted_candidates = sorted(rrf_scores.items(), key=lambda x: x[1], reverse=True)
+        combined_candidates = [chunk_map[cid] for cid, _ in sorted_candidates]
+        
         if not combined_candidates:
             return []
 

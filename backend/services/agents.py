@@ -401,9 +401,26 @@ async def search_relevant_laws(description: str) -> list[Citation]:
     if retriever is not None:
         try:
             domain = _detect_domain(description)
+            
+            # Translate/expand Darija query to formal Classical Arabic (Fusha) legal terms
+            expanded_query = description
+            try:
+                expansion_res = await groq_client.chat.completions.create(
+                    model="llama-3.1-8b-instant",
+                    messages=[
+                        {"role": "system", "content": "You are a Moroccan legal translator. Translate the Moroccan Darija query into formal Classical Arabic (Fusha) legal terms. Expand with synonyms. Output ONLY the translated Fusha query, nothing else."},
+                        {"role": "user",   "content": description}
+                    ],
+                    temperature=0.1
+                )
+                expanded_query = expansion_res.choices[0].message.content.strip()
+                print(f"[RAG] Expanded Darija Query -> Fusha: '{expanded_query}'")
+            except Exception as exp_err:
+                print(f"[RAG] Query translation/expansion failed: {exp_err} (using original)")
+
             loop   = asyncio.get_event_loop()
             chunks = await loop.run_in_executor(
-                None, lambda: retriever.retrieve(description, domain=domain, top_n=6)
+                None, lambda: retriever.retrieve(expanded_query, domain=domain, top_n=6)
             )
             citations = []
             for chunk in chunks:
@@ -413,6 +430,22 @@ async def search_relevant_laws(description: str) -> list[Citation]:
                     law_code        = chunk.law_code,
                     claim_supported = chunk.text,
                 ))
+            
+            # Fallback to the populated land_law domain if 0 results were found in another domain
+            if not citations and domain != "land_law":
+                print(f"[RAG] No chunks retrieved in '{domain}'. Querying 'land_law' as fallback...")
+                fallback_chunks = await loop.run_in_executor(
+                    None, lambda: retriever.retrieve(expanded_query, domain="land_law", top_n=6)
+                )
+                for chunk in fallback_chunks:
+                    citations.append(Citation(
+                        article_number  = chunk.article_number,
+                        law_name        = chunk.law_name,
+                        law_code        = chunk.law_code,
+                        claim_supported = chunk.text,
+                    ))
+                domain = f"{domain} -> land_law"
+                
             print(f"[RAG] Retrieved {len(citations)} chunks from domain '{domain}'.")
             return citations
         except Exception as e:
@@ -429,8 +462,22 @@ async def search_relevant_laws(description: str) -> list[Citation]:
             response_format={"type": "json_object"}
         )
         data = json.loads(response.choices[0].message.content)
-        citations_data = data.get("citations", data.get("articles", []))
-        return [Citation(**c) for c in citations_data if isinstance(c, dict)]
+        if isinstance(data, list):
+            citations_data = data
+        else:
+            citations_data = data.get("citations", data.get("articles", []))
+        
+        citations = []
+        for c in citations_data:
+            if isinstance(c, dict):
+                claim_supported = c.get("claim_supported", c.get("content", ""))
+                citations.append(Citation(
+                    article_number=str(c.get("article_number", "")),
+                    law_name=str(c.get("law_name", "")),
+                    law_code=str(c.get("law_code", "N/A")),
+                    claim_supported=str(claim_supported)
+                ))
+        return citations
     except Exception as e:
         print(f"[RAG] Fallback LLM error: {e}")
         return []
